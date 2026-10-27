@@ -67,13 +67,38 @@ class Program
     }
 }`,
       tests: [
-        { type: "code", pattern: "string\\s+petName\\s*=\\s*\"Biscuit\"", msg: "Declare string petName = \"Biscuit\";" },
-        { type: "code", pattern: "int\\s+petAge\\s*=\\s*3\\s*;", msg: "Declare int petAge = 3;" },
-        { type: "code", pattern: "(^|[^.\\w])petAge\\s*=\\s*4\\s*;", msg: "Assign 4 to petAge (without writing int again)." },
-        { type: "code", pattern: "WriteLine\\(\\s*petAge\\s*\\)", msg: "Print the variable petAge (no quotes)." },
-        { type: "outputRegex", pattern: "Biscuit\\r?\\n3\\r?\\n4", msg: "Output should be Biscuit, 3, then 4 on separate lines." }
+        { type: "code", pattern: "string\\s+petName\\s*=\\s*\"Biscuit\"", msg: "Declare string petName = \"Biscuit\";",
+          help: "This check looks for <code>string petName = \"Biscuit\"</code> in your code. Check the capital N in <code>petName</code>, the capital B in Biscuit, and the double quotes." },
+        { type: "code", pattern: "int\\s+petAge\\s*=\\s*3\\s*;", msg: "Declare int petAge = 3;",
+          help: "This check looks for <code>int petAge = 3;</code>. Numbers don't need quotes, and the name needs a capital A." },
+        { type: "code", pattern: "(^|[^.\\w])petAge\\s*=\\s*4\\s*;", msg: "Assign 4 to petAge (without writing int again).",
+          help: "This check looks for a line that changes the value: <code>petAge = 4;</code>. Don't write <code>int</code> in front, because the variable already exists." },
+        { type: "code", pattern: "WriteLine\\(\\s*petAge\\s*\\)", msg: "Print the variable petAge (no quotes).",
+          help: "This check looks for <code>Console.WriteLine(petAge)</code>. If you wrote <code>\"petAge\"</code> in quotes or typed the number <code>3</code>, use the variable name on its own instead." },
+        { type: "outputRegex", pattern: "Biscuit\\r?\\n3\\r?\\n4", msg: "Output should be Biscuit, 3, then 4 on separate lines.",
+          help: "The output should be exactly three lines: <code>Biscuit</code>, <code>3</code>, <code>4</code>. Make sure you print <code>petAge</code> once before changing it and once after." }
       ],
-      hint: "petAge = 4; changes the value. Then Console.WriteLine(petAge); prints it again."
+      hint: "petAge = 4; changes the value. Then Console.WriteLine(petAge); prints it again.",
+      goal: "When it runs, your program prints the pet's name Biscuit, its age 3, and then its new age 4, each on its own line.",
+      steps: [
+        "Under the first <code>// TODO</code>, type <code>string petName = \"Biscuit\";</code>",
+        "On the next line type <code>int petAge = 3;</code>",
+        "Under the second <code>// TODO</code>, type <code>Console.WriteLine(petName);</code> and then <code>Console.WriteLine(petAge);</code> (no quotes round the names).",
+        "Press <strong>Run</strong>. You should see <code>Biscuit</code> and <code>3</code>.",
+        "Under the last <code>// TODO</code>, type <code>petAge = 4;</code> (no <code>int</code> this time) and then print <code>petAge</code> again.",
+        "Press <strong>Run</strong> to see <code>4</code> appear underneath, then press <strong>Check</strong>."
+      ],
+      hints: [
+        "A variable is a labelled box. You make it once with its type, then you can use its name to print it or give it a new value.",
+        "Declare with <code>type name = value;</code>. To print, put the variable name inside <code>Console.WriteLine( )</code> with <strong>no</strong> quotes. To change it, write <code>name = newValue;</code>",
+        "The last part looks like this: <code>petAge = 4;</code> then <code>Console.WriteLine(petAge);</code>"
+      ],
+      mistakes: [
+        { wrong: "Printing the name in quotes: <code>Console.WriteLine(\"petName\");</code>", fix: "Quotes print the word itself. Remove them to print the value stored in the variable." },
+        { wrong: "Writing <code>int petAge = 4;</code> to change the age.", fix: "That tries to create a second variable with the same name and gives an error. Just write <code>petAge = 4;</code>" },
+        { wrong: "Forgetting the quotes round Biscuit: <code>string petName = Biscuit;</code>", fix: "Text values need double quotes: <code>\"Biscuit\"</code>." },
+        { wrong: "Different capitals, e.g. declaring <code>petAge</code> but printing <code>petage</code>.", fix: "Variable names are case sensitive. Use exactly <code>petName</code> and <code>petAge</code> every time." }
+      ]
     },
     {
       id: "m02-l2",
@@ -131,13 +156,37 @@ class Program
     }
 }`,
       tests: [
-        { type: "code", pattern: "string\\s+film\\s*=", msg: "film should be a string." },
-        { type: "code", pattern: "int\\s+screen\\s*=", msg: "screen should be an int." },
-        { type: "code", pattern: "decimal\\s+ticketPrice\\s*=\\s*7\\.50?m", msg: "ticketPrice should be a decimal: decimal ticketPrice = 7.50m;" },
-        { type: "code", pattern: "char\\s+row\\s*=\\s*'F'", msg: "row should be a char: char row = 'F';" },
-        { type: "outputRegex", pattern: "Space Rangers\\r?\\n4\\r?\\n7\\.50?\\r?\\nF\\r?\\nTrue", msg: "Print the five values in order: Space Rangers, 4, 7.50, F, True." }
+        { type: "code", pattern: "string\\s+film\\s*=", msg: "film should be a string.",
+          help: "This check looks for <code>string film =</code> in your code. The film title is text, so its type is <code>string</code>." },
+        { type: "code", pattern: "int\\s+screen\\s*=", msg: "screen should be an int.",
+          help: "This check looks for <code>int screen =</code>. A screen number is a whole number, so use <code>int</code>." },
+        { type: "code", pattern: "decimal\\s+ticketPrice\\s*=\\s*7\\.50?m", msg: "ticketPrice should be a decimal: decimal ticketPrice = 7.50m;",
+          help: "This check looks for <code>decimal ticketPrice = 7.50m</code>. Money uses <code>decimal</code>, and the value needs a small <code>m</code> on the end." },
+        { type: "code", pattern: "char\\s+row\\s*=\\s*'F'", msg: "row should be a char: char row = 'F';",
+          help: "This check looks for <code>char row = 'F'</code>. A single character uses <code>char</code> and <strong>single</strong> quotes, not double quotes." },
+        { type: "outputRegex", pattern: "Space Rangers\\r?\\n4\\r?\\n7\\.50?\\r?\\nF\\r?\\nTrue", msg: "Print the five values in order: Space Rangers, 4, 7.50, F, True.",
+          help: "The output should be five lines in this order: <code>Space Rangers</code>, <code>4</code>, <code>7.50</code>, <code>F</code>, <code>True</code>. Check the order of your <code>WriteLine</code>s and that <code>is3D</code> is a <code>bool</code> set to <code>true</code> (not the text \"true\")." }
       ],
-      hint: "Money uses decimal with an m on the end (7.50m). A single character uses char and single quotes ('F'). true/false uses bool."
+      hint: "Money uses decimal with an m on the end (7.50m). A single character uses char and single quotes ('F'). true/false uses bool.",
+      goal: "When it runs, your program prints the film name, screen number, ticket price, row letter and whether it's 3D, one per line.",
+      steps: [
+        "Under the first <code>// TODO</code>, type <code>string film = \"Space Rangers\";</code>",
+        "Add <code>int screen = 4;</code> and <code>decimal ticketPrice = 7.50m;</code> (note the <code>m</code> for money).",
+        "Add <code>char row = 'F';</code> (single quotes) and <code>bool is3D = true;</code>",
+        "Under the second <code>// TODO</code>, print each variable with its own <code>Console.WriteLine</code>, in the same order.",
+        "Press <strong>Run</strong> and check you see five lines ending in <code>True</code>, then press <strong>Check</strong>."
+      ],
+      hints: [
+        "Think about what kind of value each one is: text, whole number, money, one letter, or yes/no.",
+        "Use <code>string</code>, <code>int</code>, <code>decimal</code>, <code>char</code> and <code>bool</code>. Money needs an <code>m</code> after the number; a <code>char</code> uses single quotes.",
+        "The two tricky ones are <code>decimal ticketPrice = 7.50m;</code> and <code>char row = 'F';</code>"
+      ],
+      mistakes: [
+        { wrong: "Forgetting the <code>m</code>: <code>decimal ticketPrice = 7.50;</code>", fix: "Without <code>m</code>, C# treats 7.50 as a <code>double</code> and gives an error. Write <code>7.50m</code>." },
+        { wrong: "Using double quotes for the row: <code>char row = \"F\";</code>", fix: "A <code>char</code> needs single quotes: <code>'F'</code>." },
+        { wrong: "Putting true in quotes: <code>bool is3D = \"true\";</code>", fix: "<code>true</code> is a keyword, not text. Write it with no quotes, all lower case." },
+        { wrong: "Using <code>double</code> for the price.", fix: "It may print the right thing, but the check wants <code>decimal</code> because it's money." }
+      ]
     },
     {
       id: "m02-l3",
@@ -202,12 +251,36 @@ class Program
     }
 }`,
       tests: [
-        { type: "code", pattern: "string\\s+phoneNumber\\s*=\\s*\"07700900123\"", msg: "Store phoneNumber as a string: \"07700900123\"" },
-        { type: "code", pattern: "double\\s+heightInMetres\\s*=\\s*1\\.62", msg: "Store heightInMetres as a double holding 1.62" },
-        { type: "code", pattern: "bool\\s+hasPaidForTrip\\s*=\\s*false", msg: "Store hasPaidForTrip as a bool holding false" },
-        { type: "outputRegex", pattern: "07700900123\\r?\\n1\\.62\\r?\\nFalse", msg: "Print 07700900123, 1.62 and False on separate lines." }
+        { type: "code", pattern: "string\\s+phoneNumber\\s*=\\s*\"07700900123\"", msg: "Store phoneNumber as a string: \"07700900123\"",
+          help: "This check looks for <code>string phoneNumber = \"07700900123\"</code>. Change <code>int</code> to <code>string</code>, rename it with a small p, and put the full number (with the leading 0) in double quotes." },
+        { type: "code", pattern: "double\\s+heightInMetres\\s*=\\s*1\\.62", msg: "Store heightInMetres as a double holding 1.62",
+          help: "This check looks for <code>double heightInMetres = 1.62</code>. Change the type to <code>double</code>, fix the capitals in the name (<code>In</code> and <code>Metres</code>) and use the value 1.62." },
+        { type: "code", pattern: "bool\\s+hasPaidForTrip\\s*=\\s*false", msg: "Store hasPaidForTrip as a bool holding false",
+          help: "This check looks for <code>bool hasPaidForTrip = false</code>. Replace the underscores with camelCase, change the type to <code>bool</code> and use <code>false</code> with no quotes." },
+        { type: "outputRegex", pattern: "07700900123\\r?\\n1\\.62\\r?\\nFalse", msg: "Print 07700900123, 1.62 and False on separate lines.",
+          help: "The output should be <code>07700900123</code>, <code>1.62</code>, <code>False</code> on three lines. Make sure you updated the names inside the three <code>WriteLine</code>s to match your new variable names." }
       ],
-      hint: "Strings go in double quotes, so \"07700900123\" keeps its 0. Remember to change the names in the WriteLine lines too."
+      hint: "Strings go in double quotes, so \"07700900123\" keeps its 0. Remember to change the names in the WriteLine lines too.",
+      goal: "When it runs, your program prints the phone number with its leading 0, the height 1.62 and False, each on its own line.",
+      steps: [
+        "Press <strong>Run</strong> and look at the output. Notice the phone number has lost its 0.",
+        "Change the first line to <code>string phoneNumber = \"07700900123\";</code>",
+        "Change the second line to <code>double heightInMetres = 1.62;</code>",
+        "Change the third line to <code>bool hasPaidForTrip = false;</code>",
+        "Update the three <code>Console.WriteLine</code> lines so they use the new names exactly.",
+        "Press <strong>Run</strong>. If you get a 'does not exist' error, a name doesn't match. Then press <strong>Check</strong>."
+      ],
+      hints: [
+        "Each line has two problems: the type and the name. Fix both, then make the print lines match.",
+        "Phone numbers are <code>string</code> (in double quotes), height is <code>double</code>, and yes/no is <code>bool</code>. Use camelCase: small first letter, capital for each new word, no underscores.",
+        "The first line should become <code>string phoneNumber = \"07700900123\";</code> and the matching print line <code>Console.WriteLine(phoneNumber);</code>"
+      ],
+      mistakes: [
+        { wrong: "Renaming the variables but not the <code>WriteLine</code> lines, giving <code>The name 'PhoneNumber' does not exist</code>.", fix: "Every place the variable is used must have the same spelling and capitals as the declaration." },
+        { wrong: "Leaving the phone number as an <code>int</code>, so the 0 disappears.", fix: "Store it as a <code>string</code> in double quotes so all the digits are kept." },
+        { wrong: "Writing <code>\"false\"</code> in quotes.", fix: "A <code>bool</code> holds <code>false</code> with no quotes." },
+        { wrong: "Getting the camelCase wrong, e.g. <code>heightInmetres</code>.", fix: "Every word after the first starts with a capital: <code>heightInMetres</code>, <code>hasPaidForTrip</code>." }
+      ]
     },
     {
       id: "m02-l4",
@@ -263,13 +336,37 @@ class Program
     }
 }`,
       tests: [
-        { type: "output", includes: "Weather for Enniskillen: 11 degrees", msg: "Print Weather for Enniskillen: 11 degrees (check the colon and spaces)." },
-        { type: "code", pattern: "\\+\\s*town|town\\s*\\+", msg: "Use + to join the town variable into the sentence." },
-        { type: "code", pattern: "\\+\\s*temperature|temperature\\s*\\+", msg: "Use + to join the temperature variable into the sentence." },
-        { type: "code", pattern: "string\\s+forecast\\s*=", msg: "Create a string variable called forecast." },
-        { type: "output", includes: "Enniskillen will be wet tomorrow", msg: "Print Enniskillen will be wet tomorrow from the forecast variable." }
+        { type: "output", includes: "Weather for Enniskillen: 11 degrees", msg: "Print Weather for Enniskillen: 11 degrees (check the colon and spaces).",
+          help: "Your output needs exactly <code>Weather for Enniskillen: 11 degrees</code>. If words are squashed together, add spaces inside the quoted pieces, e.g. <code>\"Weather for \"</code> and <code>\" degrees\"</code>." },
+        { type: "code", pattern: "\\+\\s*town|town\\s*\\+", msg: "Use + to join the town variable into the sentence.",
+          help: "This check looks for <code>town</code> joined with <code>+</code>. Typing the word Enniskillen straight into the sentence won't pass: use the variable." },
+        { type: "code", pattern: "\\+\\s*temperature|temperature\\s*\\+", msg: "Use + to join the temperature variable into the sentence.",
+          help: "This check looks for <code>temperature</code> joined with <code>+</code>. Use the variable instead of typing <code>11</code> into the text." },
+        { type: "code", pattern: "string\\s+forecast\\s*=", msg: "Create a string variable called forecast.",
+          help: "This check looks for <code>string forecast =</code> in your code. Create the variable first, then print it." },
+        { type: "output", includes: "Enniskillen will be wet tomorrow", msg: "Print Enniskillen will be wet tomorrow from the forecast variable.",
+          help: "This check looks for <code>Enniskillen will be wet tomorrow</code>. Make sure the text you join on starts with a space (<code>\" will be wet tomorrow\"</code>) and that you print <code>forecast</code>." }
       ],
-      hint: "\"Weather for \" + town + \": \" + temperature + \" degrees\" — check there's a space at the edges of each quoted piece."
+      hint: "\"Weather for \" + town + \": \" + temperature + \" degrees\" — check there's a space at the edges of each quoted piece.",
+      goal: "When it runs, your program prints <code>Weather for Enniskillen: 11 degrees</code> and then <code>Enniskillen will be wet tomorrow</code>, built from variables.",
+      steps: [
+        "Under the first <code>// TODO</code>, declare <code>string town = \"Enniskillen\";</code> and <code>int temperature = 11;</code>",
+        "Under the second <code>// TODO</code>, start with <code>Console.WriteLine(\"Weather for \" + town);</code> and press <strong>Run</strong>.",
+        "Extend that line so it carries on with <code>+ \": \" + temperature + \" degrees\"</code> before the closing bracket. Run it again.",
+        "Under the last <code>// TODO</code>, type <code>string forecast = town + \" will be wet tomorrow\";</code>",
+        "Add <code>Console.WriteLine(forecast);</code>, press <strong>Run</strong>, then <strong>Check</strong>."
+      ],
+      hints: [
+        "Concatenation means joining pieces of text together. Quoted text stays the same; variable names are swapped for their values.",
+        "Alternate quoted pieces and variables, with <code>+</code> between each one. Put spaces at the edges of the quoted pieces so the words don't run together.",
+        "The weather line is <code>Console.WriteLine(\"Weather for \" + town + \": \" + temperature + \" degrees\");</code>"
+      ],
+      mistakes: [
+        { wrong: "Missing spaces, so it prints <code>Weather forEnniskillen:11degrees</code>.", fix: "Spaces only appear if they're inside the quotes. Add them at the start or end of the quoted pieces." },
+        { wrong: "Putting a variable inside quotes: <code>\"Weather for town\"</code>.", fix: "That prints the word <em>town</em>. Close the quotes, then use <code>+ town +</code>." },
+        { wrong: "Forgetting a <code>+</code> between two pieces, giving an error.", fix: "Every piece needs a <code>+</code> between it and the next one." },
+        { wrong: "Forgetting the space at the start of <code>\" will be wet tomorrow\"</code>.", fix: "Without it you get <code>Enniskillenwill be wet</code>. Add a space after the opening quote." }
+      ]
     },
     {
       id: "m02-l5",
@@ -324,12 +421,35 @@ class Program
     }
 }`,
       tests: [
-        { type: "output", includes: "Grace scored 2 tries and 1 conversion.", msg: "Print Grace scored 2 tries and 1 conversion." },
-        { type: "output", includes: "Total points: 12", msg: "Print Total points: 12" },
-        { type: "code", pattern: "\\$\"[^\"]*\\{\\s*player\\s*\\}", msg: "Use interpolation: put {player} inside a $\"...\" string." },
-        { type: "code", pattern: "\\{[^}\"]*tries[^}\"]*\\*[^}\"]*\\}|\\{[^}\"]*\\*[^}\"]*tries[^}\"]*\\}", msg: "Work out the total inside the braces, e.g. {tries * 5 + conversions * 2}." }
+        { type: "output", includes: "Grace scored 2 tries and 1 conversion.", msg: "Print Grace scored 2 tries and 1 conversion.",
+          help: "Your output needs exactly <code>Grace scored 2 tries and 1 conversion.</code> with the full stop. If you see curly braces in your output, you've forgotten the <code>$</code> before the opening quote." },
+        { type: "output", includes: "Total points: 12", msg: "Print Total points: 12",
+          help: "This check looks for <code>Total points: 12</code>. Tries are worth 5 and conversions 2, so the sum is <code>tries * 5 + conversions * 2</code>. If you get a different number, check the calculation." },
+        { type: "code", pattern: "\\$\"[^\"]*\\{\\s*player\\s*\\}", msg: "Use interpolation: put {player} inside a $\"...\" string.",
+          help: "This check looks for <code>{player}</code> inside a string that starts with <code>$\"</code>. Typing the name Grace directly, or using <code>+</code>, won't pass." },
+        { type: "code", pattern: "\\{[^}\"]*tries[^}\"]*\\*[^}\"]*\\}|\\{[^}\"]*\\*[^}\"]*tries[^}\"]*\\}", msg: "Work out the total inside the braces, e.g. {tries * 5 + conversions * 2}.",
+          help: "This check looks for a calculation using <code>tries</code> and <code>*</code> inside the curly braces. Typing <code>12</code> yourself won't pass: let the computer work it out." }
       ],
-      hint: "Console.WriteLine($\"{player} scored {tries} tries ...\"); and for the total: {tries * 5 + conversions * 2}"
+      hint: "Console.WriteLine($\"{player} scored {tries} tries ...\"); and for the total: {tries * 5 + conversions * 2}",
+      goal: "When it runs, your program prints how many tries and conversions Grace scored, then her total points (12), worked out by the program.",
+      steps: [
+        "Under the first <code>// TODO</code>, declare <code>string player = \"Grace\";</code>, <code>int tries = 2;</code> and <code>int conversions = 1;</code>",
+        "Under the second <code>// TODO</code>, type <code>Console.WriteLine($\"{player} scored {tries} tries and {conversions} conversion.\");</code>",
+        "Press <strong>Run</strong>. Check there are no curly braces showing in the output.",
+        "Under the last <code>// TODO</code>, write <code>Console.WriteLine($\"Total points: { }\");</code> and put the calculation inside the braces.",
+        "Press <strong>Run</strong>. You should see <code>Total points: 12</code>. Then press <strong>Check</strong>."
+      ],
+      hints: [
+        "Interpolation lets you drop variables straight into a sentence. You can also put a small sum inside the braces.",
+        "Start the string with <code>$\"</code> and put each variable name in <code>{ }</code>. For the total, multiply tries by 5 and conversions by 2 and add them.",
+        "The total line is <code>Console.WriteLine($\"Total points: {tries * 5 + conversions * 2}\");</code>"
+      ],
+      mistakes: [
+        { wrong: "Forgetting the <code>$</code>, so the output shows <code>{player} scored {tries}...</code>", fix: "Put <code>$</code> immediately before the opening double quote: <code>$\"...\"</code>." },
+        { wrong: "Putting a space between <code>$</code> and the quote: <code>$ \"...\"</code>", fix: "The <code>$</code> must touch the quote: <code>$\"</code>." },
+        { wrong: "Typing <code>Total points: 12</code> as plain text.", fix: "The task wants the program to calculate it. Use <code>{tries * 5 + conversions * 2}</code>." },
+        { wrong: "Writing <code>tries</code> instead of <code>conversion</code> at the end, or missing the full stop.", fix: "Compare your sentence word by word with the instructions: it ends <code>1 conversion.</code>" }
+      ]
     },
     {
       id: "m02-l6",
@@ -384,13 +504,37 @@ class Program
     }
 }`,
       tests: [
-        { type: "code", pattern: "const\\s+decimal\\s+DinnerPrice\\s*=\\s*2\\.60m", msg: "Declare const decimal DinnerPrice = 2.60m;" },
-        { type: "code", pattern: "var\\s+days\\s*=\\s*5\\s*;", msg: "Declare days using var." },
-        { type: "outputRegex", pattern: "A dinner costs £2\\.60?", msg: "Print A dinner costs £2.60" },
-        { type: "outputRegex", pattern: "5 dinners cost £13(\\.00)?(?!\\d)", msg: "Print 5 dinners cost £13.00" },
-        { type: "code", pattern: "DinnerPrice\\s*\\*\\s*days|days\\s*\\*\\s*DinnerPrice", msg: "Calculate the total with DinnerPrice * days." }
+        { type: "code", pattern: "const\\s+decimal\\s+DinnerPrice\\s*=\\s*2\\.60m", msg: "Declare const decimal DinnerPrice = 2.60m;",
+          help: "This check looks for <code>const decimal DinnerPrice = 2.60m</code>. Check the word <code>const</code> at the start, the capital D and P, and the <code>m</code> after the number." },
+        { type: "code", pattern: "var\\s+days\\s*=\\s*5\\s*;", msg: "Declare days using var.",
+          help: "This check looks for <code>var days = 5;</code>. Use the word <code>var</code> instead of <code>int</code> for this one." },
+        { type: "outputRegex", pattern: "A dinner costs £2\\.60?", msg: "Print A dinner costs £2.60",
+          help: "Your output needs <code>A dinner costs £2.60</code>. Use interpolation, e.g. <code>$\"A dinner costs £{DinnerPrice}\"</code>, and check the £ sign is inside the quotes." },
+        { type: "outputRegex", pattern: "5 dinners cost £13(\\.00)?(?!\\d)", msg: "Print 5 dinners cost £13.00",
+          help: "Your output needs <code>5 dinners cost £13.00</code>. If you see <code>£2.605</code> or similar, you've joined the numbers instead of multiplying: put <code>DinnerPrice * days</code> inside one pair of braces." },
+        { type: "code", pattern: "DinnerPrice\\s*\\*\\s*days|days\\s*\\*\\s*DinnerPrice", msg: "Calculate the total with DinnerPrice * days.",
+          help: "This check looks for <code>DinnerPrice * days</code> in your code. Typing 13.00 yourself won't pass: let the program multiply." }
       ],
-      hint: "A decimal keeps its 2 decimal places, so 2.60m * 5 prints 13.00. Use $\"{days} dinners cost £{DinnerPrice * days}\"."
+      hint: "A decimal keeps its 2 decimal places, so 2.60m * 5 prints 13.00. Use $\"{days} dinners cost £{DinnerPrice * days}\".",
+      goal: "When it runs, your program prints the price of one dinner (£2.60) and the cost of 5 dinners (£13.00), worked out from a constant.",
+      steps: [
+        "Under the first <code>// TODO</code>, type <code>const decimal DinnerPrice = 2.60m;</code>",
+        "Under the second <code>// TODO</code>, type <code>var days = 5;</code>",
+        "Under the next <code>// TODO</code>, type <code>Console.WriteLine($\"A dinner costs £{DinnerPrice}\");</code> and press <strong>Run</strong>.",
+        "Under the last <code>// TODO</code>, print a sentence that starts with <code>{days}</code> and ends with <code>£{DinnerPrice * days}</code>.",
+        "Press <strong>Run</strong>, check you see <code>5 dinners cost £13.00</code>, then press <strong>Check</strong>."
+      ],
+      hints: [
+        "A constant is a value that never changes. You can use it in calculations just like a normal variable.",
+        "Put <code>const</code> before the type for the dinner price. Use interpolation and put the multiplication <code>DinnerPrice * days</code> inside the braces.",
+        "The last line is <code>Console.WriteLine($\"{days} dinners cost £{DinnerPrice * days}\");</code>"
+      ],
+      mistakes: [
+        { wrong: "Writing <code>decimal DinnerPrice</code> without <code>const</code>.", fix: "Add the word <code>const</code> at the very start of the line." },
+        { wrong: "Missing the <code>m</code> on <code>2.60m</code>, giving a type error.", fix: "Decimal values need <code>m</code> on the end." },
+        { wrong: "Using <code>int days = 5;</code>", fix: "This task practises <code>var</code>: write <code>var days = 5;</code>" },
+        { wrong: "Putting the <code>£</code> outside the quotes, or forgetting the <code>$</code>.", fix: "Everything you want printed, including <code>£</code>, goes inside <code>$\"...\"</code>." }
+      ]
     },
     {
       id: "m02-quiz",

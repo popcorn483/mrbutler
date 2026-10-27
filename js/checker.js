@@ -7,14 +7,16 @@
   function makeInput(lines) {
     const queue = (lines || []).slice();
     let keyBuf = null;
-    return {
+    const io = {
+      ranOut: false,
       readLine() {
         if (keyBuf !== null) { const rest = keyBuf; keyBuf = null; return Promise.resolve(rest); }
+        if (!queue.length) io.ranOut = true;
         return Promise.resolve(queue.length ? String(queue.shift()) : null);
       },
       readKey() {
         if (keyBuf === null) {
-          if (!queue.length) return Promise.resolve({ key: "Enter", keyChar: "\r" });
+          if (!queue.length) { io.ranOut = true; return Promise.resolve({ key: "Enter", keyChar: "\r" }); }
           keyBuf = String(queue.shift());
         }
         if (keyBuf.length === 0) { keyBuf = null; return Promise.resolve({ key: "Enter", keyChar: "\r" }); }
@@ -23,6 +25,7 @@
         return Promise.resolve({ key: keyName(ch), keyChar: ch });
       },
     };
+    return io;
   }
 
   function keyName(ch) {
@@ -64,7 +67,7 @@
       files: fs,
       maxSteps: maxSteps || 3000000,
     });
-    return { output: tidy(out), result, files: fs };
+    return { output: tidy(out), result, files: fs, ranOut: io.ranOut, stdin: stdin || [] };
   }
 
   // Returns { passed, error, results: [{ ok, msg }], output }
@@ -93,8 +96,8 @@
         const run = await getRun(stdin);
         if (!shown) shown = run.output;
         if (!run.result.ok) {
-          if (!firstError) firstError = run.result;
-          results.push({ ok: false, msg: t.msg });
+          if (!firstError) firstError = Object.assign({}, run.result, { ranOut: run.ranOut, stdin: run.stdin, output: run.output });
+          results.push(detail(t, false, run));
           continue;
         }
         const out = run.output;
@@ -110,16 +113,24 @@
           }
         } catch (e) { ok = false; }
       }
-      results.push({ ok, msg: t.msg });
+      results.push(detail(t, ok, /^code/.test(t.type) ? null : await getRun(stdin)));
     }
     if (!(lesson.tests || []).some((t) => !/^code/.test(t.type))) {
       // Code-only tests: still make sure the program runs.
       const run = await getRun(lesson.stdin || []);
       shown = run.output;
-      if (!run.result.ok) firstError = run.result;
+      if (!run.result.ok) firstError = Object.assign({}, run.result, { ranOut: run.ranOut, stdin: run.stdin, output: run.output });
     }
     const passed = !firstError && results.every((r) => r.ok);
     return { passed, error: firstError, results, output: shown || "" };
+  }
+
+  function detail(t, ok, run) {
+    const d = { ok, msg: t.msg, help: t.help || "", type: t.type };
+    if (t.type === "output") d.expected = t.includes;
+    if (t.type === "exact") d.expected = t.expected;
+    if (run) { d.stdin = run.stdin; d.output = run.output; d.ranOut = run.ranOut; }
+    return d;
   }
 
   const Checker = { check, runOnce, makeInput, stripComments, tidy };

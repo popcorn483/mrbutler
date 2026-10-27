@@ -80,12 +80,31 @@ pet.Species = "dog";
 pet.Age = 4;
 Console.WriteLine($"{pet.Name} is a {pet.Age} year old {pet.Species}");`),
         tests: [
-          { type: "output", includes: "Biscuit is a 4 year old dog", msg: "Print Biscuit is a 4 year old dog" },
-          { type: "code", pattern: "new\\s+Pet\\s*\\(", msg: "Create the object with new Pet()." },
-          { type: "code", pattern: "\\.Species", msg: "Use the Species field of your object." },
-          { type: "codeNot", pattern: "WriteLine\\(\\s*\"Biscuit is", msg: "Build the sentence from the object's fields, not a fixed string." }
+          { type: "output", includes: "Biscuit is a 4 year old dog", msg: "Print Biscuit is a 4 year old dog", help: "Your program should print <code>Biscuit is a 4 year old dog</code>. Check the spelling and that you set all three fields." },
+          { type: "code", pattern: "new\\s+Pet\\s*\\(", msg: "Create the object with new Pet().", help: "This check looks for <code>new Pet(</code> in your code. Create the object with <code>Pet pet = new Pet();</code>" },
+          { type: "code", pattern: "\\.Species", msg: "Use the Species field of your object.", help: "This check looks for <code>.Species</code> in your code. Use <code>pet.Species</code> when you build the sentence." },
+          { type: "codeNot", pattern: "WriteLine\\(\\s*\"Biscuit is", msg: "Build the sentence from the object's fields, not a fixed string.", help: "Your sentence must be built from the object's fields, not typed as one fixed string. Use <code>$\"{pet.Name} is a ...\"</code>." }
         ],
-        hint: "Pet pet = new Pet(); pet.Name = \"Biscuit\"; ... then Console.WriteLine($\"{pet.Name} is a {pet.Age} year old {pet.Species}\");"
+        hint: "Pet pet = new Pet(); pet.Name = \"Biscuit\"; ... then Console.WriteLine($\"{pet.Name} is a {pet.Age} year old {pet.Species}\");",
+        goal: "The program makes a Pet object for Biscuit and prints a sentence about it using the object's own data.",
+        steps: [
+          "Scroll to the <code>Pet</code> class at the top and find <code>// TODO: add public fields</code>.",
+          "Add three fields: <code>public string Name;</code>, <code>public string Species;</code> and <code>public int Age;</code>",
+          "Go down to <code>Main</code> and create the object: <code>Pet pet = new Pet();</code>",
+          "Set each field with the dot, e.g. <code>pet.Name = \"Biscuit\";</code>, then do the same for <code>Species</code> (<code>\"dog\"</code>) and <code>Age</code> (<code>4</code>).",
+          "Print the sentence from the fields: <code>$\"{pet.Name} is a {pet.Age} year old {pet.Species}\"</code>. Run it."
+        ],
+        hints: [
+          "The class is the blueprint; <code>Main</code> needs to build one actual pet from it and fill in its details.",
+          "Add three <code>public</code> fields to the class. In <code>Main</code>, use <code>new Pet()</code>, then <code>pet.Name = ...</code> and so on, then an interpolated string.",
+          "<code>Pet pet = new Pet(); pet.Name = \"Biscuit\"; pet.Species = \"dog\"; pet.Age = 4;</code>"
+        ],
+        mistakes: [
+          { wrong: "Forgetting <code>new</code>: <code>Pet pet = Pet();</code> or just <code>Pet pet;</code>", fix: "Objects are created with <code>new</code>: <code>Pet pet = new Pet();</code>" },
+          { wrong: "Leaving out <code>public</code>, so <code>Main</code> says the field is inaccessible.", fix: "Fields are private by default. Write <code>public string Name;</code> for this lesson." },
+          { wrong: "Typing <code>Console.WriteLine(\"Biscuit is a 4 year old dog\");</code> as a fixed string.", fix: "Build the sentence from <code>pet.Name</code>, <code>pet.Age</code> and <code>pet.Species</code>." },
+          { wrong: "Putting the fields inside <code>Main</code> instead of the class.", fix: "Fields belong between the <code>{ }</code> of <code>class Pet</code>." }
+        ]
       },
 
       // ------------------------------------------------------------------ l2
@@ -154,12 +173,31 @@ Pet second = new Pet("Pepper", "rabbit", 1);
 Console.WriteLine($"{first.Name} is a {first.Age} year old {first.Species}");
 Console.WriteLine($"{second.Name} is a {second.Age} year old {second.Species}");`),
         tests: [
-          { type: "output", includes: "Luna is a 2 year old cat", msg: "Print Luna is a 2 year old cat" },
-          { type: "output", includes: "Pepper is a 1 year old rabbit", msg: "Print Pepper is a 1 year old rabbit" },
-          { type: "code", pattern: "public\\s+Pet\\s*\\(\\s*string", msg: "Write a constructor public Pet(string name, string species, int age)." },
-          { type: "code", pattern: "new\\s+Pet\\s*\\(\\s*\"Luna\"", msg: "Create Luna with new Pet(\"Luna\", \"cat\", 2)." }
+          { type: "output", includes: "Luna is a 2 year old cat", msg: "Print Luna is a 2 year old cat", help: "Your program should print <code>Luna is a 2 year old cat</code>. If a word is missing, check the constructor copies every parameter into its field." },
+          { type: "output", includes: "Pepper is a 1 year old rabbit", msg: "Print Pepper is a 1 year old rabbit", help: "Your program should print <code>Pepper is a 1 year old rabbit</code>. Create a second pet and print it the same way." },
+          { type: "code", pattern: "public\\s+Pet\\s*\\(\\s*string", msg: "Write a constructor public Pet(string name, string species, int age).", help: "This check looks for <code>public Pet(string</code> in your code. Write the constructor with the same name as the class and no return type." },
+          { type: "code", pattern: "new\\s+Pet\\s*\\(\\s*\"Luna\"", msg: "Create Luna with new Pet(\"Luna\", \"cat\", 2).", help: "This check looks for <code>new Pet(\"Luna\"</code>. Create Luna with <code>new Pet(\"Luna\", \"cat\", 2)</code>." }
         ],
-        hint: "public Pet(string name, string species, int age) { Name = name; Species = species; Age = age; }"
+        hint: "public Pet(string name, string species, int age) { Name = name; Species = species; Age = age; }",
+        goal: "The program creates two pets in one line each using a constructor and prints a sentence about each.",
+        steps: [
+          "Scroll to the <code>Pet</code> class and find <code>// TODO: add a constructor</code>.",
+          "Start the constructor with the same name as the class and no return type: <code>public Pet(string name, string species, int age)</code>",
+          "Inside its <code>{ }</code>, copy each parameter into a field: <code>Name = name;</code>, <code>Species = species;</code>, <code>Age = age;</code>",
+          "In <code>Main</code>, create <code>Pet first = new Pet(\"Luna\", \"cat\", 2);</code> and a second pet for Pepper.",
+          "Print a sentence for each, e.g. <code>$\"{first.Name} is a {first.Age} year old {first.Species}\"</code>. Run it."
+        ],
+        hints: [
+          "A constructor runs when you write <code>new</code>. It takes the starting values as parameters and stores them in the fields.",
+          "Write <code>public Pet(string name, string species, int age) { ... }</code> with no <code>void</code>. Then pass three values in <code>new Pet(...)</code>.",
+          "<code>public Pet(string name, string species, int age) { Name = name; Species = species; Age = age; }</code>"
+        ],
+        mistakes: [
+          { wrong: "Writing <code>public void Pet(...)</code>.", fix: "A constructor has no return type at all, not even <code>void</code>." },
+          { wrong: "Writing <code>name = name;</code>, which just copies the parameter onto itself, so the field stays empty.", fix: "Assign to the field: <code>Name = name;</code> (capital N), or <code>this.name = name;</code> if the names match exactly." },
+          { wrong: "Still writing <code>new Pet()</code> with no arguments.", fix: "Pass the values in order: <code>new Pet(\"Luna\", \"cat\", 2)</code>." },
+          { wrong: "Putting the arguments in the wrong order, giving <code>Luna is a 2 year old Luna</code>.", fix: "The order must match the constructor: name, species, age." }
+        ]
       },
 
       // ------------------------------------------------------------------ l3
@@ -281,11 +319,30 @@ account.Show();
 account.Withdraw(50);
 account.Show();`),
         tests: [
-          { type: "outputRegex", pattern: "Niamh: £15\\.00[\\s\\S]*Insufficient funds[\\s\\S]*Niamh: £15\\.00", msg: "Expected Niamh: £15.00, then Insufficient funds, then Niamh: £15.00 again." },
-          { type: "fn", fn: (o) => (o.match(/Insufficient funds/g) || []).length === 1, msg: "Insufficient funds should only print once (for the £50 withdrawal)." },
-          { type: "code", pattern: "Balance\\s*\\+=|Balance\\s*=\\s*Balance\\s*\\+", msg: "Deposit should add the amount to Balance." }
+          { type: "outputRegex", pattern: "Niamh: £15\\.00[\\s\\S]*Insufficient funds[\\s\\S]*Niamh: £15\\.00", msg: "Expected Niamh: £15.00, then Insufficient funds, then Niamh: £15.00 again.", help: "Main deposits 20, withdraws 5 and then tries to withdraw 50. You should see <code>Niamh: £15.00</code>, then <code>Insufficient funds</code>, then <code>Niamh: £15.00</code> again. Check Deposit adds, Withdraw checks first, and Show uses <code>:F2</code>." },
+          { type: "fn", fn: (o) => (o.match(/Insufficient funds/g) || []).length === 1, msg: "Insufficient funds should only print once (for the £50 withdrawal).", help: "<code>Insufficient funds</code> should only appear once, for the £50. If it appears for the £5 too, check your <code>if</code> uses <code>amount &lt;= Balance</code>." },
+          { type: "code", pattern: "Balance\\s*\\+=|Balance\\s*=\\s*Balance\\s*\\+", msg: "Deposit should add the amount to Balance.", help: "This check looks at Deposit: it should add to <code>Balance</code> with <code>Balance += amount;</code>" }
         ],
-        hint: "In Withdraw: if (amount <= Balance) { Balance -= amount; } else { Console.WriteLine(\"Insufficient funds\"); }"
+        hint: "In Withdraw: if (amount <= Balance) { Balance -= amount; } else { Console.WriteLine(\"Insufficient funds\"); }",
+        goal: "The program creates Niamh's bank account, pays in and takes out money, and refuses a withdrawal she can't afford.",
+        steps: [
+          "Scroll to <code>Deposit</code> in the <code>BankAccount</code> class and replace the TODO with <code>Balance += amount;</code>",
+          "Find <code>Withdraw</code>. Add <code>if (amount &lt;= Balance)</code> and inside it <code>Balance -= amount;</code>",
+          "Add an <code>else</code> that prints <code>Insufficient funds</code>.",
+          "Find <code>Show</code> and print <code>$\"{Owner}: £{Balance:F2}\"</code>.",
+          "Main is done for you. Run it: you should see <code>Niamh: £15.00</code>, <code>Insufficient funds</code>, then <code>Niamh: £15.00</code> again."
+        ],
+        hints: [
+          "Each method changes or shows this object's own <code>Balance</code>. Withdraw must check first that there's enough.",
+          "Use <code>+=</code> in Deposit and <code>-=</code> in Withdraw, inside an <code>if</code>/<code>else</code>. In Show, use <code>:F2</code> for two decimal places.",
+          "<code>if (amount &lt;= Balance) { Balance -= amount; } else { Console.WriteLine(\"Insufficient funds\"); }</code>"
+        ],
+        mistakes: [
+          { wrong: "Writing <code>Balance = amount;</code> in Deposit, which replaces the balance instead of adding to it.", fix: "Use <code>Balance += amount;</code>" },
+          { wrong: "Taking the money off before checking, so the balance goes negative.", fix: "Only do <code>Balance -= amount;</code> inside the <code>if (amount &lt;= Balance)</code> block." },
+          { wrong: "Using <code>&lt;</code> instead of <code>&lt;=</code>, so you can't withdraw your exact balance.", fix: "Withdrawing exactly what you have is allowed: use <code>&lt;=</code>." },
+          { wrong: "Printing <code>{Balance}</code> without <code>:F2</code>, giving <code>Niamh: £15</code>.", fix: "Write <code>£{Balance:F2}</code> to show <code>15.00</code>." }
+        ]
       },
 
       // ------------------------------------------------------------------ l4
@@ -367,12 +424,31 @@ account.Deposit(-500);
 
 Console.WriteLine($"Balance: £{account.GetBalance():F2}");`),
         tests: [
-          { type: "code", pattern: "private\\s+double\\s+balance", msg: "Make balance a private field." },
-          { type: "output", includes: "Deposit must be positive", msg: "Depositing -500 should print Deposit must be positive" },
-          { type: "output", includes: "Balance: £20.00", msg: "The final balance should be £20.00" },
-          { type: "code", pattern: "GetBalance\\s*\\(", msg: "Add and use a GetBalance() method." }
+          { type: "code", pattern: "private\\s+double\\s+balance", msg: "Make balance a private field.", help: "This check looks for <code>private double balance</code> in your code. Change <code>public</code> to <code>private</code> on the field." },
+          { type: "output", includes: "Deposit must be positive", msg: "Depositing -500 should print Deposit must be positive", help: "Main tries to deposit -500. Your program should print <code>Deposit must be positive</code>. Add an <code>if (amount &lt;= 0)</code> check at the start of Deposit." },
+          { type: "output", includes: "Balance: £20.00", msg: "The final balance should be £20.00", help: "The final line should be <code>Balance: £20.00</code>. If it's -480, add <code>return;</code> after the warning. If it's 1000000, delete the cheat line." },
+          { type: "code", pattern: "GetBalance\\s*\\(", msg: "Add and use a GetBalance() method.", help: "This check looks for <code>GetBalance(</code> in your code. Add the method and use it in the last <code>WriteLine</code>." }
         ],
-        hint: "Change public to private on the field. Add public double GetBalance() { return balance; }. In Main, delete the cheat line and use account.GetBalance()."
+        hint: "Change public to private on the field. Add public double GetBalance() { return balance; }. In Main, delete the cheat line and use account.GetBalance().",
+        goal: "The program protects the bank balance so it can only change through Deposit, rejects a negative deposit, and shows Balance: £20.00.",
+        steps: [
+          "At the top of <code>BankAccount</code>, change <code>public double balance;</code> to <code>private double balance;</code>",
+          "Press Run. Read the error about the cheat line in <code>Main</code>, then delete that whole line.",
+          "Replace <code>// TODO: add GetBalance()</code> with <code>public double GetBalance() { return balance; }</code>",
+          "In <code>Main</code>, change the last line to use <code>account.GetBalance()</code> instead of <code>account.balance</code>.",
+          "In <code>Deposit</code>, add a check at the top: if <code>amount &lt;= 0</code>, print <code>Deposit must be positive</code> and <code>return;</code>. Run it."
+        ],
+        hints: [
+          "Hide the field so nothing outside the class can change it, then give the outside world a safe way to read it.",
+          "Make the field <code>private</code>, add a <code>public</code> method that returns it, and use an <code>if</code> with <code>return;</code> in Deposit to refuse bad amounts.",
+          "<code>if (amount &lt;= 0) { Console.WriteLine(\"Deposit must be positive\"); return; }</code>"
+        ],
+        mistakes: [
+          { wrong: "Leaving the cheat line <code>account.balance = 1000000;</code> in <code>Main</code>.", fix: "Once the field is private that line won't compile. Delete it." },
+          { wrong: "Still using <code>account.balance</code> in the final <code>WriteLine</code>.", fix: "Use the method instead: <code>account.GetBalance()</code>." },
+          { wrong: "Printing the warning but forgetting <code>return;</code>, so the -500 is still added.", fix: "Add <code>return;</code> after the message (or put <code>balance += amount;</code> in an <code>else</code>)." },
+          { wrong: "Making a public property to get round the private field.", fix: "This lesson wants a <code>GetBalance()</code> method, and no way to <em>set</em> the balance from outside." }
+        ]
       },
 
       // ------------------------------------------------------------------ l5
@@ -484,13 +560,33 @@ catch (ArgumentException ex)
 p.Mark = 35;
 Console.WriteLine($"{p.Name}: {p.Mark} passed {p.Passed}");`),
         tests: [
-          { type: "output", includes: "Grace: 72 passed True", msg: "Print Grace: 72 passed True" },
-          { type: "output", includes: "Mark must be 0 to 100.", msg: "Setting Mark to 150 should throw an ArgumentException with the message Mark must be 0 to 100." },
-          { type: "output", includes: "Grace: 35 passed False", msg: "Print Grace: 35 passed False" },
-          { type: "code", pattern: "Name\\s*\\{\\s*get;\\s*private\\s+set;\\s*\\}", msg: "Name should be { get; private set; }" },
-          { type: "code", pattern: "set\\s*\\{[\\s\\S]*value", msg: "Use value inside the Mark setter." }
+          { type: "output", includes: "Grace: 72 passed True", msg: "Print Grace: 72 passed True", help: "After <code>p.Mark = 72</code>, your program should print <code>Grace: 72 passed True</code>. Check you've uncommented the lines in <code>Main</code>, set <code>Name</code> in the constructor, and that <code>Passed</code> uses <code>Mark &gt;= 40</code>." },
+          { type: "output", includes: "Mark must be 0 to 100.", msg: "Setting Mark to 150 should throw an ArgumentException with the message Mark must be 0 to 100.", help: "Setting <code>Mark</code> to 150 should throw an exception with the message <code>Mark must be 0 to 100.</code> Put the <code>throw</code> inside the property's <code>set</code>." },
+          { type: "output", includes: "Grace: 35 passed False", msg: "Print Grace: 35 passed False", help: "After <code>p.Mark = 35</code>, it should print <code>Grace: 35 passed False</code>. Make sure the setter stores <code>mark = value;</code> after the check." },
+          { type: "code", pattern: "Name\\s*\\{\\s*get;\\s*private\\s+set;\\s*\\}", msg: "Name should be { get; private set; }", help: "This check looks for <code>Name { get; private set; }</code> exactly. Use that auto-property for <code>Name</code>." },
+          { type: "code", pattern: "set\\s*\\{[\\s\\S]*value", msg: "Use value inside the Mark setter.", help: "This check looks for <code>value</code> inside a <code>set { }</code> block. Write a full property for <code>Mark</code>, not an auto-property." }
         ],
-        hint: "private int mark; public int Mark { get { return mark; } set { if (value < 0 || value > 100) throw new ArgumentException(\"Mark must be 0 to 100.\"); mark = value; } }"
+        hint: "private int mark; public int Mark { get { return mark; } set { if (value < 0 || value > 100) throw new ArgumentException(\"Mark must be 0 to 100.\"); mark = value; } }",
+        goal: "The program stores a pupil's mark through a property that refuses marks outside 0 to 100, and says whether they passed.",
+        steps: [
+          "In the <code>Pupil</code> class, replace the first TODO with <code>public string Name { get; private set; }</code>",
+          "In the constructor, set it: <code>Name = name;</code>",
+          "Replace the second TODO with a private field <code>private int mark;</code> and a property <code>public int Mark { get { return mark; } set { ... } }</code>",
+          "Inside <code>set</code>, if <code>value &lt; 0 || value &gt; 100</code>, throw <code>new ArgumentException(\"Mark must be 0 to 100.\")</code>. Then write <code>mark = value;</code>",
+          "Replace the third TODO with <code>public bool Passed { get { return Mark &gt;= 40; } }</code>",
+          "In <code>Main</code>, remove the <code>//</code> from the five commented lines. Run it."
+        ],
+        hints: [
+          "A property looks like a field from outside but runs code when you read or set it. The <code>set</code> part is where the checking goes.",
+          "You need a private field <code>mark</code>, a full property <code>Mark</code> with <code>get</code> and <code>set</code>, and the keyword <code>value</code> inside <code>set</code>.",
+          "<code>public int Mark { get { return mark; } set { if (value &lt; 0 || value &gt; 100) throw new ArgumentException(\"Mark must be 0 to 100.\"); mark = value; } }</code>"
+        ],
+        mistakes: [
+          { wrong: "Writing <code>Mark = value;</code> inside the <code>Mark</code> setter, which calls itself forever and crashes.", fix: "Store it in the lower-case field: <code>mark = value;</code>" },
+          { wrong: "Making <code>mark</code> a public field instead of using a property.", fix: "Keep <code>private int mark;</code> and let everyone go through <code>public int Mark { get; set; }</code> so the check always runs." },
+          { wrong: "Forgetting to remove the <code>//</code> in <code>Main</code>, so nothing prints.", fix: "Uncomment all the lines in <code>Main</code> once your class compiles." },
+          { wrong: "Writing <code>Passed</code> as <code>Mark &gt; 40</code>.", fix: "40 counts as a pass: <code>Mark &gt;= 40</code>." }
+        ]
       },
 
       // ------------------------------------------------------------------ l6
@@ -593,12 +689,32 @@ foreach (Player player in squad)
 }
 Console.WriteLine($"Top try scorer: {top.Name}");`, LIST),
         tests: [
-          { type: "output", includes: "Aoife (Winger) - 4 tries", msg: "Print Aoife (Winger) - 4 tries" },
-          { type: "outputRegex", pattern: "Ben \\(Prop\\) - 1 tries[\\s\\S]*Grace \\(Centre\\) - 6 tries", msg: "Print Ben and Grace in the same format." },
-          { type: "output", includes: "Top try scorer: Grace", msg: "Print Top try scorer: Grace" },
-          { type: "code", pattern: "override\\s+string\\s+ToString", msg: "Override ToString in Player." }
+          { type: "output", includes: "Aoife (Winger) - 4 tries", msg: "Print Aoife (Winger) - 4 tries", help: "Your program should print <code>Aoife (Winger) - 4 tries</code>. Check the brackets, spaces and dash in your <code>ToString</code>." },
+          { type: "outputRegex", pattern: "Ben \\(Prop\\) - 1 tries[\\s\\S]*Grace \\(Centre\\) - 6 tries", msg: "Print Ben and Grace in the same format.", help: "Ben and Grace should be printed in the same format. Add all three players with <code>new Player(...)</code> and print each in the loop." },
+          { type: "output", includes: "Top try scorer: Grace", msg: "Print Top try scorer: Grace", help: "It should print <code>Top try scorer: Grace</code>. Keep the best player in <code>top</code> and update it when <code>player.Tries &gt; top.Tries</code>." },
+          { type: "code", pattern: "override\\s+string\\s+ToString", msg: "Override ToString in Player.", help: "This check looks for <code>override string ToString</code> in your code. Don't forget the word <code>override</code>." }
         ],
-        hint: "public override string ToString() { return $\"{Name} ({Position}) - {Tries} tries\"; }. To find the top scorer, keep the best Player so far in a variable."
+        hint: "public override string ToString() { return $\"{Name} ({Position}) - {Tries} tries\"; }. To find the top scorer, keep the best Player so far in a variable.",
+        goal: "The program lists three rugby players in a neat format and names the top try scorer.",
+        steps: [
+          "In the <code>Player</code> class, replace the TODO with <code>public override string ToString()</code> and a <code>{ }</code> block.",
+          "Make it <code>return $\"{Name} ({Position}) - {Tries} tries\";</code>",
+          "In <code>Main</code>, add the players: <code>squad.Add(new Player(\"Aoife\", \"Winger\", 4));</code>, then Ben and Grace.",
+          "Set up <code>Player top = squad[0];</code>, then loop with <code>foreach (Player player in squad)</code>.",
+          "Inside the loop, print <code>Console.WriteLine(player);</code> and if <code>player.Tries &gt; top.Tries</code> set <code>top = player;</code>",
+          "After the loop, print <code>$\"Top try scorer: {top.Name}\"</code>. Run it."
+        ],
+        hints: [
+          "<code>Console.WriteLine(player)</code> calls the object's <code>ToString()</code>. Replace it with your own version. For the top scorer, remember the best player so far.",
+          "Use <code>public override string ToString()</code> in the class. In <code>Main</code>, a <code>foreach</code> loop over <code>squad</code> both prints and compares <code>Tries</code>.",
+          "<code>Player top = squad[0]; foreach (Player player in squad) { Console.WriteLine(player); if (player.Tries &gt; top.Tries) { top = player; } }</code>"
+        ],
+        mistakes: [
+          { wrong: "Missing <code>override</code>: <code>public string ToString()</code>.", fix: "You're replacing a method every class already has, so write <code>public override string ToString()</code>." },
+          { wrong: "Printing inside <code>ToString</code> with <code>Console.WriteLine</code> instead of returning the text.", fix: "<code>ToString</code> must <code>return</code> a string; <code>Main</code> does the printing." },
+          { wrong: "Forgetting <code>new</code>: <code>squad.Add(Player(\"Aoife\", \"Winger\", 4));</code>", fix: "Create each object with <code>new Player(...)</code>." },
+          { wrong: "Setting <code>top</code> to the last player in the list rather than the one with the most tries.", fix: "Only change <code>top</code> inside <code>if (player.Tries &gt; top.Tries)</code>." }
+        ]
       },
 
       // ------------------------------------------------------------------ l7
@@ -685,12 +801,32 @@ Console.WriteLine(b);
 Console.WriteLine(c);
 Console.WriteLine($"Pets registered: {Pet.Count}");`),
         tests: [
-          { type: "outputRegex", pattern: "#1 Biscuit\\s*\\n#2 Luna\\s*\\n#3 Max", msg: "Print #1 Biscuit, #2 Luna, #3 Max on separate lines." },
-          { type: "output", includes: "Pets registered: 3", msg: "Print Pets registered: 3" },
-          { type: "code", pattern: "static\\s+int\\s+Count", msg: "Make Count a static int." },
-          { type: "code", pattern: "Pet\\.Count", msg: "Use Pet.Count (the class name) to read the static field." }
+          { type: "outputRegex", pattern: "#1 Biscuit\\s*\\n#2 Luna\\s*\\n#3 Max", msg: "Print #1 Biscuit, #2 Luna, #3 Max on separate lines.", help: "The pets should print as <code>#1 Biscuit</code>, <code>#2 Luna</code>, <code>#3 Max</code> on separate lines. If they're all #1, make <code>Count</code> static and do <code>Count++</code> before <code>Id = Count</code>." },
+          { type: "output", includes: "Pets registered: 3", msg: "Print Pets registered: 3", help: "It should print <code>Pets registered: 3</code>. Use <code>Pet.Count</code> after creating all three pets." },
+          { type: "code", pattern: "static\\s+int\\s+Count", msg: "Make Count a static int.", help: "This check looks for <code>static int Count</code> in your code. Add the word <code>static</code> to the field." },
+          { type: "code", pattern: "Pet\\.Count", msg: "Use Pet.Count (the class name) to read the static field.", help: "This check looks for <code>Pet.Count</code> in your code. Read the static field through the class name, not an object." }
         ],
-        hint: "public static int Count = 0; In the constructor: Count++; Id = Count;"
+        hint: "public static int Count = 0; In the constructor: Count++; Id = Count;",
+        goal: "The program registers three pets, gives each one an ID number in order, and counts how many there are.",
+        steps: [
+          "In the <code>Pet</code> class, replace <code>// TODO: static Count</code> with <code>public static int Count = 0;</code>",
+          "Replace <code>// TODO: Id property</code> with <code>public int Id { get; private set; }</code>",
+          "In the constructor, add <code>Count++;</code> and then <code>Id = Count;</code>",
+          "Add <code>public override string ToString() { return $\"#{Id} {Name}\"; }</code>",
+          "In <code>Main</code>, create Biscuit, Luna and Max with <code>new Pet(...)</code> and print each one.",
+          "Print <code>$\"Pets registered: {Pet.Count}\"</code> using the class name. Run it."
+        ],
+        hints: [
+          "One number is shared by the whole class (the count), but each pet has its own ID. Which keyword makes a field shared?",
+          "Mark <code>Count</code> as <code>static</code>. Increase it in the constructor, then copy it into the instance property <code>Id</code>. Read it with <code>Pet.Count</code>.",
+          "<code>public Pet(string name) { Name = name; Count++; Id = Count; }</code>"
+        ],
+        mistakes: [
+          { wrong: "Making <code>Count</code> a normal (non-static) field, so every pet shows <code>#1</code>.", fix: "Add <code>static</code>: <code>public static int Count = 0;</code> Then there's only one shared count." },
+          { wrong: "Setting <code>Id = Count;</code> before <code>Count++;</code>, so the IDs start at 0.", fix: "Increase the count first, then copy it into <code>Id</code>." },
+          { wrong: "Reading the count as <code>a.Count</code>.", fix: "Static members belong to the class: use <code>Pet.Count</code>." },
+          { wrong: "Forgetting <code>override</code> on <code>ToString</code>, so it prints <code>Pet</code>.", fix: "Write <code>public override string ToString()</code>." }
+        ]
       },
 
       // ------------------------------------------------------------------ quiz

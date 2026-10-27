@@ -98,12 +98,31 @@ Cat luna = new Cat("Luna");
 luna.Eat();
 luna.Purr();`),
         tests: [
-          { type: "output", includes: "Luna is eating.", msg: "Call the inherited Eat() method to print Luna is eating." },
-          { type: "output", includes: "Luna purrs.", msg: "Print Luna purrs. from Purr()." },
-          { type: "code", pattern: "class\\s+Cat\\s*:\\s*Animal", msg: "Cat must inherit from Animal (class Cat : Animal)." },
-          { type: "code", pattern: ":\\s*base\\s*\\(\\s*name\\s*\\)", msg: "Use : base(name) in the Cat constructor." }
+          { type: "output", includes: "Luna is eating.", msg: "Call the inherited Eat() method to print Luna is eating.", help: "Your program should print <code>Luna is eating.</code> Create the cat and call <code>luna.Eat();</code> (the method comes from Animal)." },
+          { type: "output", includes: "Luna purrs.", msg: "Print Luna purrs. from Purr().", help: "Your program should print <code>Luna purrs.</code> Add a <code>Purr()</code> method to <code>Cat</code> and call it." },
+          { type: "code", pattern: "class\\s+Cat\\s*:\\s*Animal", msg: "Cat must inherit from Animal (class Cat : Animal).", help: "This check looks for <code>class Cat : Animal</code> in your code. Put the colon and <code>Animal</code> after the class name." },
+          { type: "code", pattern: ":\\s*base\\s*\\(\\s*name\\s*\\)", msg: "Use : base(name) in the Cat constructor.", help: "This check looks for <code>: base(name)</code> after the Cat constructor's brackets." }
         ],
-        hint: "class Cat : Animal { public Cat(string name) : base(name) { } public void Purr() { Console.WriteLine($\"{Name} purrs.\"); } }"
+        hint: "class Cat : Animal { public Cat(string name) : base(name) { } public void Purr() { Console.WriteLine($\"{Name} purrs.\"); } }",
+        goal: "The program creates a cat called Luna that can eat (inherited from Animal) and purr (its own method).",
+        steps: [
+          "Scroll to <code>// TODO: class Cat : Animal</code> under the <code>Animal</code> class.",
+          "Start the class: <code>class Cat : Animal</code> with a <code>{ }</code> block.",
+          "Add the constructor: <code>public Cat(string name) : base(name) { }</code> The body can stay empty.",
+          "Add <code>public void Purr()</code> that prints <code>$\"{Name} purrs.\"</code>",
+          "In <code>Main</code>, create <code>Cat luna = new Cat(\"Luna\");</code>, then call <code>luna.Eat();</code> and <code>luna.Purr();</code>. Run it."
+        ],
+        hints: [
+          "<code>Cat</code> should get everything <code>Animal</code> has for free, and add one thing of its own.",
+          "Use a colon to inherit (<code>class Cat : Animal</code>) and <code>: base(name)</code> after the constructor so <code>Animal</code> stores the name.",
+          "<code>public Cat(string name) : base(name) { }</code>"
+        ],
+        mistakes: [
+          { wrong: "Forgetting <code>: base(name)</code>, which gives an error that <code>Animal</code> has no constructor with 0 arguments.", fix: "Pass the name up: <code>public Cat(string name) : base(name) { }</code>" },
+          { wrong: "Trying <code>Name = name;</code> in the Cat constructor.", fix: "<code>Name</code> has a <code>private set</code> in <code>Animal</code>, so only Animal can set it. Use <code>: base(name)</code> instead." },
+          { wrong: "Copying the <code>Eat()</code> method into <code>Cat</code>.", fix: "There's no need: <code>Cat</code> inherits <code>Eat()</code> from <code>Animal</code>." },
+          { wrong: "Forgetting <code>new</code>: <code>Cat luna = Cat(\"Luna\");</code>", fix: "Write <code>new Cat(\"Luna\")</code>." }
+        ]
       },
 
       // ------------------------------------------------------------------ l2
@@ -203,11 +222,28 @@ SavingsAccount savings = new SavingsAccount(200);
 savings.AddInterest();
 Console.WriteLine($"Balance: £{savings.GetBalance():F2}");`),
         tests: [
-          { type: "output", includes: "Balance: £210.00", msg: "£200 plus 5% interest should print Balance: £210.00" },
-          { type: "code", pattern: "protected\\s+double\\s+balance", msg: "Keep balance protected." },
-          { type: "codeNot", pattern: "public\\s+double\\s+balance", msg: "Don't make balance public." }
+          { type: "output", includes: "Balance: £210.00", msg: "£200 plus 5% interest should print Balance: £210.00", help: "£200 plus 5% interest should print <code>Balance: £210.00</code>. In <code>AddInterest</code>, write <code>balance = balance * 1.05;</code>" },
+          { type: "code", pattern: "protected\\s+double\\s+balance", msg: "Keep balance protected.", help: "This check looks for <code>protected double balance</code>. Don't change or remove that line in <code>Account</code>." },
+          { type: "codeNot", pattern: "public\\s+double\\s+balance", msg: "Don't make balance public.", help: "This check fails if it finds <code>public double balance</code>. Keep the field <code>protected</code>." }
         ],
-        hint: "Inside AddInterest: balance = balance * 1.05; (or balance *= 1.05;)"
+        hint: "Inside AddInterest: balance = balance * 1.05; (or balance *= 1.05;)",
+        goal: "The program opens a savings account with £200, adds 5% interest and shows Balance: £210.00.",
+        steps: [
+          "Scroll to <code>SavingsAccount</code> and find <code>AddInterest()</code>.",
+          "Replace the TODO with <code>balance = balance * 1.05;</code> (you can use <code>balance</code> here because it's <code>protected</code>).",
+          "Leave <code>protected double balance;</code> in <code>Account</code> exactly as it is.",
+          "Run it: you should see <code>Balance: £210.00</code>."
+        ],
+        hints: [
+          "<code>SavingsAccount</code> is a child of <code>Account</code>, so it's allowed to use the protected field directly.",
+          "Change <code>balance</code> inside <code>AddInterest</code>. Adding 5% is the same as multiplying by 1.05.",
+          "<code>balance *= 1.05;</code>"
+        ],
+        mistakes: [
+          { wrong: "Changing <code>protected</code> to <code>public</code> to make the error go away.", fix: "Keep it <code>protected</code>. A subclass can already use it." },
+          { wrong: "Multiplying by <code>0.05</code>, which gives £10 instead of £210.", fix: "Multiply by <code>1.05</code> (the original plus 5%), or add <code>balance * 0.05</code>." },
+          { wrong: "Changing the balance from <code>Main</code>, e.g. <code>savings.balance = 210;</code>", fix: "<code>Main</code> isn't a subclass, so it can't see <code>balance</code>. Do the change inside <code>AddInterest</code>." }
+        ]
       },
 
       // ------------------------------------------------------------------ l3
@@ -334,13 +370,32 @@ Manager aoife = new Manager("Aoife", 30000, 4);
 Console.WriteLine(ben.Describe());
 Console.WriteLine(aoife.Describe());`),
         tests: [
-          { type: "output", includes: "Ben earns £24000", msg: "Print Ben earns £24000" },
-          { type: "output", includes: "Aoife earns £30000 (manages 4)", msg: "Print Aoife earns £30000 (manages 4)" },
-          { type: "code", pattern: "virtual\\s+string\\s+Describe", msg: "Make Describe virtual in Employee." },
-          { type: "code", pattern: "override\\s+string\\s+Describe", msg: "Override Describe in Manager." },
-          { type: "code", pattern: "base\\.Describe\\s*\\(", msg: "Call base.Describe() in the override." }
+          { type: "output", includes: "Ben earns £24000", msg: "Print Ben earns £24000", help: "Your program should print <code>Ben earns £24000</code>. Don't change what <code>Employee.Describe</code> returns." },
+          { type: "output", includes: "Aoife earns £30000 (manages 4)", msg: "Print Aoife earns £30000 (manages 4)", help: "Your program should print <code>Aoife earns £30000 (manages 4)</code>. Return <code>base.Describe() + $\" (manages {TeamSize})\"</code> in the override." },
+          { type: "code", pattern: "virtual\\s+string\\s+Describe", msg: "Make Describe virtual in Employee.", help: "This check looks for <code>virtual string Describe</code>. Add <code>virtual</code> to the method in <code>Employee</code>." },
+          { type: "code", pattern: "override\\s+string\\s+Describe", msg: "Override Describe in Manager.", help: "This check looks for <code>override string Describe</code>. Add the override method to <code>Manager</code>." },
+          { type: "code", pattern: "base\\.Describe\\s*\\(", msg: "Call base.Describe() in the override.", help: "This check looks for <code>base.Describe(</code>. Use it in the override to reuse the parent's text." }
         ],
-        hint: "public override string Describe() { return base.Describe() + $\" (manages {TeamSize})\"; }"
+        hint: "public override string Describe() { return base.Describe() + $\" (manages {TeamSize})\"; }",
+        goal: "The program describes an employee and a manager, with the manager's description adding how many people they manage.",
+        steps: [
+          "In <code>Employee</code>, find <code>public string Describe()</code> and add <code>virtual</code>: <code>public virtual string Describe()</code>",
+          "Scroll to <code>Manager</code> and find <code>// TODO: override Describe()</code>.",
+          "Write <code>public override string Describe()</code> with a <code>{ }</code> block.",
+          "Inside, return the parent's text plus the extra part: <code>return base.Describe() + $\" (manages {TeamSize})\";</code>",
+          "Run it: you should see <code>Ben earns £24000</code> and <code>Aoife earns £30000 (manages 4)</code>."
+        ],
+        hints: [
+          "The parent has to allow its method to be replaced, and the child has to say it's replacing it. The child can still reuse the parent's version.",
+          "Add <code>virtual</code> in <code>Employee</code> and <code>override</code> in <code>Manager</code>. Call the parent's version with <code>base.Describe()</code>.",
+          "<code>public override string Describe() { return base.Describe() + $\" (manages {TeamSize})\"; }</code>"
+        ],
+        mistakes: [
+          { wrong: "Missing <code>override</code> in <code>Manager</code>, which gives a warning about hiding the inherited member.", fix: "Write <code>public override string Describe()</code>." },
+          { wrong: "Adding <code>override</code> but forgetting <code>virtual</code> in <code>Employee</code>.", fix: "You can only override a method marked <code>virtual</code> (or abstract). Add <code>virtual</code> to the parent." },
+          { wrong: "Retyping <code>$\"{Name} earns £{Salary}\"</code> in the override instead of using <code>base.Describe()</code>.", fix: "Reuse the parent's code with <code>base.Describe()</code>." },
+          { wrong: "Missing the space before the bracket, giving <code>£30000(manages 4)</code>.", fix: "The added text starts with a space: <code>\" (manages ...)\"</code>." }
+        ]
       },
 
       // ------------------------------------------------------------------ l4
@@ -473,13 +528,33 @@ foreach (Ticket t in basket)
 }
 Console.WriteLine($"Total: £{total:F2}");`),
         tests: [
-          { type: "output", includes: "Child: £5.50", msg: "Print Child: £5.50 for a child ticket." },
-          { type: "output", includes: "VIP: £12.50", msg: "Print VIP: £12.50 for the VIP ticket." },
-          { type: "output", includes: "Adult: £8.00", msg: "Print Adult: £8.00 for the adult ticket." },
-          { type: "output", includes: "Total: £31.50", msg: "8.00 + 5.50 + 12.50 + 5.50 = Total: £31.50" },
-          { type: "code", pattern: "foreach\\s*\\(\\s*Ticket\\s+\\w+\\s+in", msg: "Loop through the list with foreach (Ticket t in basket)." }
+          { type: "output", includes: "Child: £5.50", msg: "Print Child: £5.50 for a child ticket.", help: "Your program should print <code>Child: £5.50</code>. Override <code>Price()</code> in <code>ChildTicket</code> to return 5.50 and print with <code>:F2</code>." },
+          { type: "output", includes: "VIP: £12.50", msg: "Print VIP: £12.50 for the VIP ticket.", help: "Your program should print <code>VIP: £12.50</code>. Override <code>Price()</code> in <code>VipTicket</code>." },
+          { type: "output", includes: "Adult: £8.00", msg: "Print Adult: £8.00 for the adult ticket.", help: "Your program should print <code>Adult: £8.00</code>. Add a plain <code>new Ticket()</code> to the basket." },
+          { type: "output", includes: "Total: £31.50", msg: "8.00 + 5.50 + 12.50 + 5.50 = Total: £31.50", help: "The total of all four tickets should be <code>Total: £31.50</code>. Check you added two child tickets and that you add <code>t.Price()</code> in the loop." },
+          { type: "code", pattern: "foreach\\s*\\(\\s*Ticket\\s+\\w+\\s+in", msg: "Loop through the list with foreach (Ticket t in basket).", help: "This check looks for <code>foreach (Ticket t in basket)</code> (any variable name). Loop through the list as <code>Ticket</code>s." }
         ],
-        hint: "In ChildTicket: public override double Price() { return 5.50; } In Main use basket.Add(new ChildTicket()); and a foreach loop that adds t.Price() to a total."
+        hint: "In ChildTicket: public override double Price() { return 5.50; } In Main use basket.Add(new ChildTicket()); and a foreach loop that adds t.Price() to a total.",
+        goal: "The program fills a basket with adult, child and VIP tickets, lists each with its price and shows the total.",
+        steps: [
+          "Scroll to <code>ChildTicket</code> and replace its TODO with <code>public override double Price() { return 5.50; }</code>",
+          "Do the same in <code>VipTicket</code>, returning <code>12.50</code>.",
+          "In <code>Main</code>, add four tickets: <code>basket.Add(new Ticket());</code>, <code>new ChildTicket()</code>, <code>new VipTicket()</code> and another <code>new ChildTicket()</code>.",
+          "Set up <code>double total = 0;</code> and loop with <code>foreach (Ticket t in basket)</code>.",
+          "In the loop, print <code>$\"{t.Name}: £{t.Price():F2}\"</code> and add <code>t.Price()</code> to <code>total</code>.",
+          "After the loop, print <code>$\"Total: £{total:F2}\"</code>. Run it."
+        ],
+        hints: [
+          "The list only knows it holds <code>Ticket</code>s, but each object will use its own version of <code>Price()</code>. That's polymorphism.",
+          "Override <code>Price()</code> in both subclasses. In <code>Main</code>, add the objects with <code>basket.Add(new ...)</code> and use one <code>foreach</code> loop to print and total them.",
+          "<code>foreach (Ticket t in basket) { Console.WriteLine($\"{t.Name}: £{t.Price():F2}\"); total += t.Price(); }</code>"
+        ],
+        mistakes: [
+          { wrong: "Missing <code>override</code>, so every ticket costs £8.00.", fix: "Write <code>public override double Price()</code> in each subclass." },
+          { wrong: "Using <code>if</code> statements in <code>Main</code> to work out the price of each type.", fix: "Let each object do it: just call <code>t.Price()</code>." },
+          { wrong: "Forgetting <code>new</code>: <code>basket.Add(ChildTicket());</code>", fix: "Write <code>basket.Add(new ChildTicket());</code>" },
+          { wrong: "Only adding one child ticket, giving a total of £26.00.", fix: "The basket needs four tickets: adult, child, VIP and a second child." }
+        ]
       },
 
       // ------------------------------------------------------------------ l5
@@ -623,12 +698,31 @@ foreach (Shape s in shapes)
     s.Describe();
 }`),
         tests: [
-          { type: "output", includes: "Rectangle has area 12.0", msg: "Print Rectangle has area 12.0" },
-          { type: "output", includes: "Circle has area 28.3", msg: "A circle of radius 3 should print Circle has area 28.3" },
-          { type: "code", pattern: "class\\s+Circle\\s*:\\s*Shape", msg: "Circle must inherit from Shape." },
-          { type: "code", pattern: "override\\s+double\\s+Area", msg: "Override Area() in Circle." }
+          { type: "output", includes: "Rectangle has area 12.0", msg: "Print Rectangle has area 12.0", help: "Your program should still print <code>Rectangle has area 12.0</code>. Don't change <code>Rectangle</code> or the loop in <code>Main</code>." },
+          { type: "output", includes: "Circle has area 28.3", msg: "A circle of radius 3 should print Circle has area 28.3", help: "A circle of radius 3 should print <code>Circle has area 28.3</code>. Add <code>new Circle(3)</code> to the list, and use <code>this.radius = radius;</code> in the constructor." },
+          { type: "code", pattern: "class\\s+Circle\\s*:\\s*Shape", msg: "Circle must inherit from Shape.", help: "This check looks for <code>class Circle : Shape</code> in your code." },
+          { type: "code", pattern: "override\\s+double\\s+Area", msg: "Override Area() in Circle.", help: "This check looks for <code>override double Area</code>. Add the override to <code>Circle</code>." }
         ],
-        hint: "class Circle : Shape { private double radius; public Circle(double radius) : base(\"Circle\") { this.radius = radius; } public override double Area() { return Math.PI * radius * radius; } }"
+        hint: "class Circle : Shape { private double radius; public Circle(double radius) : base(\"Circle\") { this.radius = radius; } public override double Area() { return Math.PI * radius * radius; } }",
+        goal: "The program describes a rectangle and a circle, each working out its own area.",
+        steps: [
+          "Look at <code>Rectangle</code>: your <code>Circle</code> will follow the same pattern.",
+          "At <code>// TODO: class Circle : Shape</code>, start <code>class Circle : Shape</code> and add <code>private double radius;</code>",
+          "Add the constructor: <code>public Circle(double radius) : base(\"Circle\")</code> and inside it <code>this.radius = radius;</code>",
+          "Add <code>public override double Area()</code> that returns <code>Math.PI * radius * radius</code>.",
+          "In <code>Main</code>, replace the TODO with <code>shapes.Add(new Circle(3));</code>. Run it: you should see <code>Circle has area 28.3</code>."
+        ],
+        hints: [
+          "<code>Shape</code> is abstract, so <code>Circle</code> must provide its own <code>Area()</code>. <code>Rectangle</code> shows you exactly how.",
+          "Copy the shape of <code>Rectangle</code>: a private field, a constructor with <code>: base(\"Circle\")</code>, and <code>public override double Area()</code>.",
+          "<code>public Circle(double radius) : base(\"Circle\") { this.radius = radius; } public override double Area() { return Math.PI * radius * radius; }</code>"
+        ],
+        mistakes: [
+          { wrong: "Writing <code>radius = radius;</code> in the constructor, so the field stays 0 and the area is 0.0.", fix: "The parameter has the same name as the field, so write <code>this.radius = radius;</code>" },
+          { wrong: "Forgetting <code>: base(\"Circle\")</code>.", fix: "<code>Shape</code> has no empty constructor, so you must pass the name up with <code>: base(\"Circle\")</code>." },
+          { wrong: "Missing <code>override</code> on <code>Area()</code>, which gives an error that Circle doesn't implement the abstract member.", fix: "Write <code>public override double Area()</code>." },
+          { wrong: "Trying <code>new Shape(\"Circle\")</code> in <code>Main</code>.", fix: "You can't create an abstract class. Create a <code>new Circle(3)</code> instead." }
+        ]
       },
 
       // ------------------------------------------------------------------ l6
@@ -745,13 +839,33 @@ foreach (IDescribable item in items)
     Console.WriteLine(item.Describe());
 }`),
         tests: [
-          { type: "output", includes: "Film: Paddington (PG)", msg: "Print Film: Paddington (PG)" },
-          { type: "output", includes: "Snack: Popcorn £4.50", msg: "Print Snack: Popcorn £4.50" },
-          { type: "code", pattern: "interface\\s+IDescribable", msg: "Declare interface IDescribable." },
-          { type: "code", pattern: "class\\s+Snack\\s*:\\s*IDescribable", msg: "Snack should implement IDescribable." },
-          { type: "code", pattern: "List<\\s*IDescribable\\s*>", msg: "Store the items in a List<IDescribable>." }
+          { type: "output", includes: "Film: Paddington (PG)", msg: "Print Film: Paddington (PG)", help: "Your program should print <code>Film: Paddington (PG)</code>. Check the <code>Describe</code> method in <code>Film</code> and that you added the film to the list." },
+          { type: "output", includes: "Snack: Popcorn £4.50", msg: "Print Snack: Popcorn £4.50", help: "Your program should print <code>Snack: Popcorn £4.50</code>. Use <code>{Price:F2}</code> to get two decimal places." },
+          { type: "code", pattern: "interface\\s+IDescribable", msg: "Declare interface IDescribable.", help: "This check looks for <code>interface IDescribable</code> in your code." },
+          { type: "code", pattern: "class\\s+Snack\\s*:\\s*IDescribable", msg: "Snack should implement IDescribable.", help: "This check looks for <code>class Snack : IDescribable</code>. Add the interface after the class name." },
+          { type: "code", pattern: "List<\\s*IDescribable\\s*>", msg: "Store the items in a List<IDescribable>.", help: "This check looks for <code>List&lt;IDescribable&gt;</code>. Use the interface as the list's type." }
         ],
-        hint: "interface IDescribable { string Describe(); } then class Film : IDescribable { ... public string Describe() { return $\"Film: {Title} ({Rating})\"; } }"
+        hint: "interface IDescribable { string Describe(); } then class Film : IDescribable { ... public string Describe() { return $\"Film: {Title} ({Rating})\"; } }",
+        goal: "The program treats a film and a snack the same way through an interface and prints a description of each.",
+        steps: [
+          "At <code>// TODO: interface IDescribable</code>, write <code>interface IDescribable { string Describe(); }</code>",
+          "Change <code>class Film</code> to <code>class Film : IDescribable</code>.",
+          "Inside <code>Film</code>, add <code>public string Describe()</code> that returns <code>$\"Film: {Title} ({Rating})\"</code>. Run to check it compiles.",
+          "Do the same for <code>Snack</code>: <code>class Snack : IDescribable</code> and a <code>Describe()</code> returning <code>$\"Snack: {Name} £{Price:F2}\"</code>.",
+          "In <code>Main</code>, make <code>List&lt;IDescribable&gt; items = new List&lt;IDescribable&gt;();</code> and add <code>new Film(\"Paddington\", \"PG\")</code> and <code>new Snack(\"Popcorn\", 4.50)</code>.",
+          "Loop with <code>foreach (IDescribable item in items)</code> and print <code>item.Describe()</code>. Run it."
+        ],
+        hints: [
+          "Film and Snack aren't related, but both can <em>describe themselves</em>. An interface names that shared skill.",
+          "Declare the interface with just the method heading. Each class says <code>: IDescribable</code> and writes a <code>public string Describe()</code>. The list's type is the interface.",
+          "<code>class Snack : IDescribable { ... public string Describe() { return $\"Snack: {Name} £{Price:F2}\"; } }</code>"
+        ],
+        mistakes: [
+          { wrong: "Writing <code>override</code> on the interface method.", fix: "When implementing an interface, just write <code>public string Describe()</code>, with no <code>override</code>." },
+          { wrong: "Forgetting <code>public</code> on <code>Describe()</code>.", fix: "Interface methods must be implemented as <code>public</code>." },
+          { wrong: "Giving the interface method a body, e.g. <code>string Describe() { ... }</code>.", fix: "Inside the interface, end the line with a semicolon: <code>string Describe();</code>" },
+          { wrong: "Making a <code>List&lt;Film&gt;</code>, which can't hold a Snack.", fix: "Use <code>List&lt;IDescribable&gt;</code> so both kinds fit." }
+        ]
       },
 
       // ------------------------------------------------------------------ l7

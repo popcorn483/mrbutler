@@ -1275,13 +1275,33 @@ public static string Hash(string text)
         solution: prog([USER_HASH], MAIN_L2),
         stdin: ["Quiz2026"],
         tests: [
-          { type: "output", includes: H.abc, msg: "The hash of abc should be ba7816bf…20015ad." },
-          { type: "output", stdin: ["Quiz2026"], includes: "Stored as: " + H.Quiz2026, msg: "Quiz2026 should be stored as b2876a67…" },
-          { type: "fn", stdin: ["quiz2026"], fn: (o) => /Stored as: [0-9a-f]{64}/.test(o) && !o.includes(H.Quiz2026), msg: "quiz2026 should give a different 64-character hash from Quiz2026." },
-          { type: "code", pattern: "ComputeHash", msg: "Use sha.ComputeHash." },
-          { type: "code", pattern: "\"x2\"", msg: "Write each byte with ToString(\"x2\")." }
+          { type: "output", includes: H.abc, msg: "The hash of abc should be ba7816bf…20015ad.", help: "Main hashes <code>abc</code>, which must give <code>ba7816bf…20015ad</code>. If you get a blank line, your method still returns <code>\"\"</code>; if it's different, check you used <code>\"x2\"</code> and <code>Encoding.UTF8</code>." },
+          { type: "output", stdin: ["Quiz2026"], includes: "Stored as: " + H.Quiz2026, msg: "Quiz2026 should be stored as b2876a67…", help: "With the input <code>Quiz2026</code>, it should print <code>Stored as: b2876a67…</code>. Make sure you hash the <code>text</code> parameter, not a fixed word." },
+          { type: "fn", stdin: ["quiz2026"], fn: (o) => /Stored as: [0-9a-f]{64}/.test(o) && !o.includes(H.Quiz2026), msg: "quiz2026 should give a different 64-character hash from Quiz2026.", help: "With the input <code>quiz2026</code>, it should print a different 64-character lower-case hash. If you get the same hash as Quiz2026, you aren't hashing the parameter." },
+          { type: "code", pattern: "ComputeHash", msg: "Use sha.ComputeHash.", help: "This check looks for <code>ComputeHash</code> in your code. Use <code>sha.ComputeHash(...)</code>." },
+          { type: "code", pattern: "\"x2\"", msg: "Write each byte with ToString(\"x2\").", help: "This check looks for <code>\"x2\"</code> in your code. Write each byte with <code>b.ToString(\"x2\")</code>." }
         ],
-        hint: "Copy the shape from the example: using (SHA256 sha = SHA256.Create()) { byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(text)); ... }"
+        hint: "Copy the shape from the example: using (SHA256 sha = SHA256.Create()) { byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(text)); ... }",
+        goal: "The program turns any password into a 64-character SHA-256 hash, so it can be stored safely instead of as plain text.",
+        steps: [
+          "This is the first piece of the quiz project. Scroll to the <code>User</code> class and find <code>Hash</code> with its four TODOs.",
+          "For TODO 1, start a block: <code>using (SHA256 sha = SHA256.Create()) { }</code> and move <code>return \"\";</code> inside it for now.",
+          "For TODO 2, inside the block write <code>byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(text));</code>",
+          "For TODO 3, make <code>StringBuilder hex = new StringBuilder();</code> and loop <code>foreach (byte b in bytes)</code> doing <code>hex.Append(b.ToString(\"x2\"));</code>",
+          "For TODO 4, change the return to <code>return hex.ToString();</code>",
+          "Run it: the hash of <code>abc</code> should start <code>ba7816bf</code>. Try <code>Quiz2026</code> and <code>quiz2026</code> to see how different they are."
+        ],
+        hints: [
+          "The method takes text in and must give back a long string of hex digits. The example in the lesson has exactly the shape you need.",
+          "Turn the text into bytes with <code>Encoding.UTF8.GetBytes</code>, hash them with <code>sha.ComputeHash</code>, then build the answer with a <code>StringBuilder</code> and <code>ToString(\"x2\")</code> for each byte.",
+          "<code>byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(text));<br>StringBuilder hex = new StringBuilder();<br>foreach (byte b in bytes)<br>{<br>&nbsp;&nbsp;&nbsp;&nbsp;hex.Append(b.ToString(\"x2\"));<br>}<br>return hex.ToString();</code>"
+        ],
+        mistakes: [
+          { wrong: "Leaving <code>return \"\";</code> in place, so every hash is blank.", fix: "Return the finished string: <code>return hex.ToString();</code>" },
+          { wrong: "Using <code>b.ToString()</code> or <code>\"X2\"</code>, giving the wrong length or capital letters.", fix: "Use lower-case <code>\"x2\"</code> so every byte becomes exactly two lower-case hex digits." },
+          { wrong: "Hashing the word <code>\"text\"</code> in quotes instead of the parameter.", fix: "Pass the variable: <code>Encoding.UTF8.GetBytes(text)</code>." },
+          { wrong: "Forgetting <code>new</code>: <code>StringBuilder hex = StringBuilder();</code>", fix: "Write <code>new StringBuilder()</code>." }
+        ]
       },
 
       // ================================================================ l3
@@ -1328,13 +1348,33 @@ ${out(cs`aoife,b2876a672a238a52f643343d2bad1340a78794c4d81117f9ace4429bd6357c4a`
         solution: prog([USER], MAIN_L3),
         stdin: ["Quiz2026"],
         tests: [
-          { type: "output", stdin: ["Quiz2026"], includes: "Access granted", msg: "The password Quiz2026 should print Access granted." },
-          { type: "fn", stdin: ["quiz2026"], fn: (o) => o.includes("Access denied") && !o.includes("Access granted"), msg: "quiz2026 (wrong case) should print Access denied." },
-          { type: "output", stdin: ["Quiz2026"], includes: "Saved as: aoife," + H.Quiz2026, msg: "ToFileLine should return aoife, then a comma, then the hash." },
-          { type: "code", pattern: "private\\s+string\\s+passwordHash", msg: "passwordHash must be a private field." },
-          { type: "code", pattern: "Username\\s*\\{\\s*get;\\s*private\\s+set;\\s*\\}", msg: "Username should be { get; private set; }" }
+          { type: "output", stdin: ["Quiz2026"], includes: "Access granted", msg: "The password Quiz2026 should print Access granted.", help: "With the input <code>Quiz2026</code>, it should print <code>Access granted</code>. Check the constructor uses <code>this.passwordHash = passwordHash;</code> and CheckPassword compares <code>Hash(attempt)</code>." },
+          { type: "fn", stdin: ["quiz2026"], fn: (o) => o.includes("Access denied") && !o.includes("Access granted"), msg: "quiz2026 (wrong case) should print Access denied.", help: "With the input <code>quiz2026</code> (wrong case), it should print <code>Access denied</code> and not Access granted. Make sure you compare hashes, not just ignore case." },
+          { type: "output", stdin: ["Quiz2026"], includes: "Saved as: aoife," + H.Quiz2026, msg: "ToFileLine should return aoife, then a comma, then the hash.", help: "<code>ToFileLine()</code> should give <code>aoife,</code> followed by the hash, shown after <code>Saved as: </code>. Return <code>$\"{Username},{passwordHash}\"</code> with no spaces." },
+          { type: "code", pattern: "private\\s+string\\s+passwordHash", msg: "passwordHash must be a private field.", help: "This check looks for <code>private string passwordHash</code> in your code." },
+          { type: "code", pattern: "Username\\s*\\{\\s*get;\\s*private\\s+set;\\s*\\}", msg: "Username should be { get; private set; }", help: "This check looks for <code>Username { get; private set; }</code> exactly." }
         ],
-        hint: "public bool CheckPassword(string attempt) { return Hash(attempt) == passwordHash; } and public string ToFileLine() { return $\"{Username},{passwordHash}\"; }"
+        hint: "public bool CheckPassword(string attempt) { return Hash(attempt) == passwordHash; } and public string ToFileLine() { return $\"{Username},{passwordHash}\"; }",
+        goal: "The program creates a user called aoife with a hashed password, shows how she'd be saved to a file, and checks a password you type.",
+        steps: [
+          "Your <code>Hash</code> method from the last lesson is already here. Scroll to the TODOs at the top of <code>User</code>.",
+          "Add <code>public string Username { get; private set; }</code> and <code>private string passwordHash;</code>",
+          "Add the constructor <code>public User(string username, string passwordHash)</code> with <code>Username = username;</code> and <code>this.passwordHash = passwordHash;</code>",
+          "Add <code>public bool CheckPassword(string attempt)</code> that returns <code>Hash(attempt) == passwordHash</code>.",
+          "Add <code>public string ToFileLine()</code> that returns <code>$\"{Username},{passwordHash}\"</code>.",
+          "In <code>Main</code>, remove the <code>//</code> from every commented line. Run it and type <code>Quiz2026</code>."
+        ],
+        hints: [
+          "The user keeps its password hash secret. Other code can only ask \"is this the right password?\", never read the hash.",
+          "Use an auto-property with <code>private set</code> for <code>Username</code>, a private field for the hash, and <code>this.</code> in the constructor because the parameter has the same name as the field.",
+          "<code>public bool CheckPassword(string attempt)<br>{<br>&nbsp;&nbsp;&nbsp;&nbsp;return Hash(attempt) == passwordHash;<br>}</code>"
+        ],
+        mistakes: [
+          { wrong: "Writing <code>passwordHash = passwordHash;</code> in the constructor, so the field stays empty and every login is denied.", fix: "The parameter shadows the field. Write <code>this.passwordHash = passwordHash;</code>" },
+          { wrong: "Comparing the attempt directly: <code>return attempt == passwordHash;</code>", fix: "The stored value is a hash, so hash the attempt first: <code>Hash(attempt) == passwordHash</code>." },
+          { wrong: "Making <code>passwordHash</code> public, or adding a property for it.", fix: "Keep it a <code>private string</code> field with no property. That's the point of encapsulation here." },
+          { wrong: "Forgetting to uncomment the lines in <code>Main</code>, so nothing prints.", fix: "Remove the <code>//</code> from every line under the TODO in <code>Main</code>." }
+        ]
       },
 
       // ================================================================ l4
@@ -1384,15 +1424,35 @@ public bool Register(string username, string password, out string message)
         starter: prog([USER, UM_STUB], MAIN_L4),
         solution: prog([USER, UM_V1], MAIN_L4),
         tests: [
-          { type: "output", includes: "aoife: Account created. You can now log in.", msg: "Registering aoife with Quiz2026 should work." },
-          { type: "output", includes: "al: Username must be 3 to 15 characters.", msg: "al is too short." },
-          { type: "output", includes: "big ben: Username cannot contain commas or spaces.", msg: "big ben contains a space." },
-          { type: "output", includes: "AOIFE: That username is already taken.", msg: "AOIFE should count as the same name as aoife." },
-          { type: "output", includes: "ben: Password needs 8+ characters, a capital letter and a digit.", msg: "password has no capital letter or digit." },
-          { type: "outputRegex", pattern: "Login 1: welcome aoife[\\s\\S]*Login 2: failed[\\s\\S]*Login 3: failed", msg: "Login 1 should succeed; login 2 (wrong password) and login 3 (unknown user) should fail." },
-          { type: "code", pattern: "User\\.Hash\\(\\s*password\\s*\\)", msg: "Store User.Hash(password), never the plain password." }
+          { type: "output", includes: "aoife: Account created. You can now log in.", msg: "Registering aoife with Quiz2026 should work.", help: "Main registers <code>aoife</code> with <code>Quiz2026</code>. It should print <code>aoife: Account created. You can now log in.</code> Set that message and return true at the end of Register." },
+          { type: "output", includes: "al: Username must be 3 to 15 characters.", msg: "al is too short.", help: "<code>al</code> has only 2 characters, so it should print <code>Username must be 3 to 15 characters.</code> Check the length first." },
+          { type: "output", includes: "big ben: Username cannot contain commas or spaces.", msg: "big ben contains a space.", help: "<code>big ben</code> contains a space, so it should print <code>Username cannot contain commas or spaces.</code> Use <code>username.Contains(\" \")</code>." },
+          { type: "output", includes: "AOIFE: That username is already taken.", msg: "AOIFE should count as the same name as aoife.", help: "<code>AOIFE</code> should count as the same name as <code>aoife</code> and print <code>That username is already taken.</code> Use <code>.ToLower()</code> in FindUser and call it from Register." },
+          { type: "output", includes: "ben: Password needs 8+ characters, a capital letter and a digit.", msg: "password has no capital letter or digit.", help: "<code>ben</code> with <code>password</code> should print the weak password message. Call <code>IsStrongPassword(password)</code> as the last check." },
+          { type: "outputRegex", pattern: "Login 1: welcome aoife[\\s\\S]*Login 2: failed[\\s\\S]*Login 3: failed", msg: "Login 1 should succeed; login 2 (wrong password) and login 3 (unknown user) should fail.", help: "Login 1 (<code>Aoife</code>/<code>Quiz2026</code>) should succeed; login 2 (wrong password) and login 3 (<code>niamh</code>, who doesn't exist) should fail. Return the user only when FindUser finds them <em>and</em> CheckPassword is true." },
+          { type: "code", pattern: "User\\.Hash\\(\\s*password\\s*\\)", msg: "Store User.Hash(password), never the plain password.", help: "This check looks for <code>User.Hash(password)</code> in your code. Hash the password before creating the User." }
         ],
-        hint: "In Register, after each failed check set message and return false. At the end: users.Add(new User(username, User.Hash(password))); In Login: User user = FindUser(username); if (user != null && user.CheckPassword(password)) return user;"
+        hint: "In Register, after each failed check set message and return false. At the end: users.Add(new User(username, User.Hash(password))); In Login: User user = FindUser(username); if (user != null && user.CheckPassword(password)) return user;",
+        goal: "The program registers users with proper validation and lets them log in, rejecting bad usernames, weak passwords and wrong logins.",
+        steps: [
+          "Your finished <code>User</code> class is above. Scroll to the <code>UserManager</code> class and find <code>FindUser</code>.",
+          "In <code>FindUser</code>, loop <code>foreach (User u in users)</code> and return <code>u</code> when <code>u.Username.ToLower() == username.ToLower()</code>. Leave <code>return null;</code> after the loop.",
+          "In <code>Register</code>, add the length check first: if the length is under 3 or over 15, set <code>message = \"Username must be 3 to 15 characters.\";</code> and <code>return false;</code>",
+          "Add the other three checks in order, the same way: <code>username.Contains(\",\") || username.Contains(\" \")</code>, then <code>FindUser(username) != null</code>, then <code>!IsStrongPassword(password)</code>.",
+          "At the end of <code>Register</code>, add <code>users.Add(new User(username, User.Hash(password)));</code>, set the success message and <code>return true;</code> Run it.",
+          "In <code>Login</code>, use <code>FindUser</code> and return the user only if it isn't <code>null</code> and <code>CheckPassword</code> is true."
+        ],
+        hints: [
+          "Each check in <code>Register</code> is a guard: if it fails, set the message and leave straight away. Only a username that gets past every guard is added.",
+          "Each guard is an <code>if</code> that sets <code>message</code> and does <code>return false;</code>. Reuse <code>FindUser</code> for the \"already taken\" check and for <code>Login</code>.",
+          "<code>public User Login(string username, string password)<br>{<br>&nbsp;&nbsp;&nbsp;&nbsp;User user = FindUser(username);<br>&nbsp;&nbsp;&nbsp;&nbsp;if (user != null &amp;&amp; user.CheckPassword(password))<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return user;<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;&nbsp;&nbsp;return null;<br>}</code>"
+        ],
+        mistakes: [
+          { wrong: "Storing the plain password: <code>new User(username, password)</code>.", fix: "Always hash it first: <code>new User(username, User.Hash(password))</code>." },
+          { wrong: "Putting <code>return null;</code> inside the <code>foreach</code> in FindUser, so it gives up after the first user.", fix: "Only <code>return u;</code> goes inside the loop. <code>return null;</code> goes after it." },
+          { wrong: "Comparing usernames without <code>.ToLower()</code>, so <code>AOIFE</code> is allowed as a new user.", fix: "Lower-case both sides in <code>FindUser</code>." },
+          { wrong: "Forgetting <code>return false;</code> after setting an error message, so the user is still added.", fix: "Every failed check must set <code>message</code> <em>and</em> <code>return false;</code>" }
+        ]
       },
 
       // ================================================================ l5
@@ -1451,12 +1511,32 @@ private void Load()
         starter: prog([USER, UM_STUB2], MAIN_L5),
         solution: prog([USER, UM], MAIN_L5),
         tests: [
-          { type: "output", includes: "Loaded grace from users.txt", msg: "grace should be loaded from users.txt, so her login works." },
-          { type: "output", includes: "Account created. You can now log in.", msg: "ciaran should be registered." },
-          { type: "fn", fn: (o, c, f) => JSON.stringify(lines(f["users.txt"])) === JSON.stringify(["grace," + H.Rugby2026, "ciaran," + H.Pass1234]), msg: "users.txt should end up with grace's line and then ciaran's line (with his hashed password)." },
-          { type: "code", pattern: "File\\.Exists", msg: "Check the file exists before reading it." }
+          { type: "output", includes: "Loaded grace from users.txt", msg: "grace should be loaded from users.txt, so her login works.", help: "This check uses the pre-loaded <code>users.txt</code>, which contains grace. Main logs in as grace, so it should print <code>Loaded grace from users.txt</code>. Call <code>Load()</code> in the constructor and add a User for each two-part line (without hashing again)." },
+          { type: "output", includes: "Account created. You can now log in.", msg: "ciaran should be registered.", help: "Main registers <code>ciaran</code> with <code>Pass1234</code>, so it should print <code>Account created. You can now log in.</code> Keep Register working as it did last lesson." },
+          { type: "fn", fn: (o, c, f) => JSON.stringify(lines(f["users.txt"])) === JSON.stringify(["grace," + H.Rugby2026, "ciaran," + H.Pass1234]), msg: "users.txt should end up with grace's line and then ciaran's line (with his hashed password).", help: "This check reads <code>users.txt</code> after your program runs. It should hold grace's line then ciaran's line with his hashed password. Write Save with <code>File.WriteAllLines</code> and call <code>Save();</code> after <code>users.Add</code>." },
+          { type: "code", pattern: "File\\.Exists", msg: "Check the file exists before reading it.", help: "This check looks for <code>File.Exists</code> in your code. Use it at the start of <code>Load</code>." }
         ],
-        hint: "Constructor: Load(); Save: build a List<string> of u.ToFileLine() and File.WriteAllLines(UsersFile, lines); In Register put Save(); just after users.Add(...)."
+        hint: "Constructor: Load(); Save: build a List<string> of u.ToFileLine() and File.WriteAllLines(UsersFile, lines); In Register put Save(); just after users.Add(...).",
+        goal: "The program saves every account to users.txt and loads them again next time, so accounts survive after the program closes.",
+        steps: [
+          "Your <code>User</code> class and the <code>FindUser</code>, <code>Register</code> and <code>Login</code> methods you wrote last lesson are already here. Scroll to the <code>UserManager</code> constructor.",
+          "In the constructor, replace the TODO with <code>Load();</code>",
+          "In <code>Load</code>, start with <code>if (!File.Exists(UsersFile)) return;</code>",
+          "Then, inside a <code>try</code>, loop <code>foreach (string line in File.ReadAllLines(UsersFile))</code>. Split with <code>line.Split(',')</code> and, if <code>parts.Length == 2</code>, add <code>new User(parts[0], parts[1])</code>. Catch <code>IOException</code> and print a warning. Run: you should see <code>Loaded grace from users.txt</code>.",
+          "In <code>Save</code>, build a <code>List&lt;string&gt;</code> of <code>u.ToFileLine()</code> for every user, then <code>File.WriteAllLines(UsersFile, lines);</code>",
+          "In <code>Register</code>, replace <code>// TODO: save the users</code> with <code>Save();</code> Run it and look at <code>users.txt</code> in the files panel."
+        ],
+        hints: [
+          "Load once when the manager is created, and save every time a user is added. The file holds one <code>username,hash</code> line per user.",
+          "Load reads with <code>File.ReadAllLines</code> and <code>Split(',')</code>; Save writes with <code>File.WriteAllLines</code> using each user's <code>ToFileLine()</code>. Check <code>File.Exists</code> before reading.",
+          "<code>private void Save()<br>{<br>&nbsp;&nbsp;&nbsp;&nbsp;List&lt;string&gt; lines = new List&lt;string&gt;();<br>&nbsp;&nbsp;&nbsp;&nbsp;foreach (User u in users)<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lines.Add(u.ToFileLine());<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;&nbsp;&nbsp;File.WriteAllLines(UsersFile, lines);<br>}</code>"
+        ],
+        mistakes: [
+          { wrong: "Writing <code>Load()</code> but never calling it from the constructor, so grace isn't found.", fix: "Put <code>Load();</code> inside <code>public UserManager() { }</code>." },
+          { wrong: "Reading the file without <code>File.Exists</code>, which crashes on the very first run.", fix: "Start Load with <code>if (!File.Exists(UsersFile)) return;</code>" },
+          { wrong: "Using <code>File.AppendAllText</code> in Save, so grace gets written twice.", fix: "Save writes the whole list each time, so use <code>File.WriteAllLines</code> to replace the file." },
+          { wrong: "Passing the hash through <code>User.Hash</code> again when loading: <code>new User(parts[0], User.Hash(parts[1]))</code>.", fix: "The file already holds the hash. Use <code>new User(parts[0], parts[1])</code>." }
+        ]
       },
 
       // ================================================================ l6
@@ -1508,13 +1588,34 @@ public override void Display()
         solution: prog([QUESTION, MCQ, TFQ], MAIN_L6),
         stdin: ["B", "F"],
         tests: [
-          { type: "output", stdin: ["B", "F"], includes: "Score: 2", msg: "Answering B then F should score 2." },
-          { type: "output", stdin: ["B", "F"], includes: "True or false? (T/F):", msg: "Display should end with True or false? (T/F): " },
-          { type: "fn", stdin: ["E", "b", "yes", "true"], fn: (o) => count(o, "That is not a valid answer") === 2 && o.includes("Wrong. The answer was False") && o.includes("Score: 1"), msg: "E and yes are invalid; true is accepted but wrong (The answer was False), so the score is 1." },
-          { type: "code", pattern: "class\\s+TrueFalseQuestion\\s*:\\s*Question", msg: "TrueFalseQuestion must inherit from Question." },
-          { type: "fn", fn: (o, c) => count(c, "override") >= 8, msg: "Override all four abstract methods in TrueFalseQuestion." }
+          { type: "output", stdin: ["B", "F"], includes: "Score: 2", msg: "Answering B then F should score 2.", help: "With the answers <code>B</code> then <code>F</code>, both are right, so it should print <code>Score: 2</code>. Add the true/false question to the list in Main and check <code>CheckAnswer</code> compares with <code>correctAnswer</code>." },
+          { type: "output", stdin: ["B", "F"], includes: "True or false? (T/F):", msg: "Display should end with True or false? (T/F): ", help: "Your <code>Display</code> should end with <code>True or false? (T/F): </code>. Use <code>Console.Write</code> with that exact text." },
+          { type: "fn", stdin: ["E", "b", "yes", "true"], fn: (o) => count(o, "That is not a valid answer") === 2 && o.includes("Wrong. The answer was False") && o.includes("Score: 1"), msg: "E and yes are invalid; true is accepted but wrong (The answer was False), so the score is 1.", help: "This feeds in <code>E</code>, <code>b</code>, <code>yes</code>, <code>true</code>. <code>E</code> and <code>yes</code> must be rejected; <code>true</code> is accepted but wrong (<code>The answer was False</code>), so the score is 1. Check <code>IsValidAnswer</code> accepts only T, F, TRUE, FALSE after <code>Trim().ToUpper()</code>." },
+          { type: "code", pattern: "class\\s+TrueFalseQuestion\\s*:\\s*Question", msg: "TrueFalseQuestion must inherit from Question.", help: "This check looks for <code>class TrueFalseQuestion : Question</code> in your code." },
+          { type: "fn", fn: (o, c) => count(c, "override") >= 8, msg: "Override all four abstract methods in TrueFalseQuestion.", help: "This check counts the word <code>override</code>: MultipleChoiceQuestion has four, so you need four more in TrueFalseQuestion (Display, IsValidAnswer, CheckAnswer, CorrectAnswerText)." }
         ],
-        hint: "IsValidAnswer: if (answer == null) return false; answer = answer.Trim().ToUpper(); return answer == \"T\" || answer == \"F\" || answer == \"TRUE\" || answer == \"FALSE\"; CheckAnswer: bool saidTrue = answer.Trim().ToUpper().StartsWith(\"T\"); return saidTrue == correctAnswer;"
+        hint: "IsValidAnswer: if (answer == null) return false; answer = answer.Trim().ToUpper(); return answer == \"T\" || answer == \"F\" || answer == \"TRUE\" || answer == \"FALSE\"; CheckAnswer: bool saidTrue = answer.Trim().ToUpper().StartsWith(\"T\"); return saidTrue == correctAnswer;",
+        goal: "The program asks a multiple-choice and a true/false question in the same loop, rejects invalid answers and gives a score.",
+        steps: [
+          "The <code>User</code> and <code>UserManager</code> classes from earlier lessons are here unchanged. Read <code>Question</code> and <code>MultipleChoiceQuestion</code>: your class follows the same pattern.",
+          "At <code>// TODO: class TrueFalseQuestion : Question</code>, start the class with <code>private bool correctAnswer;</code>",
+          "Add the constructor: <code>public TrueFalseQuestion(string text, bool correctAnswer, int points) : base(text, points)</code> with <code>this.correctAnswer = correctAnswer;</code> inside.",
+          "Add <code>public override void Display()</code>: print <code>Text</code>, then <code>Console.Write(\"True or false? (T/F): \");</code>",
+          "Add <code>public override bool IsValidAnswer(string answer)</code>: return false for <code>null</code>, then <code>Trim().ToUpper()</code> and accept T, F, TRUE or FALSE.",
+          "Add <code>CheckAnswer</code> (does the answer start with T, and does that match <code>correctAnswer</code>?) and <code>CorrectAnswerText</code> (return <code>\"True\"</code> or <code>\"False\"</code>), both with <code>override</code>.",
+          "In <code>Main</code>, replace the TODO with <code>questions.Add(new TrueFalseQuestion(\"Array indexes in C# start at 1.\", false, 1));</code> Run with B then F."
+        ],
+        hints: [
+          "<code>Question</code> is abstract and promises four methods. Your new class has to keep all four promises, just like <code>MultipleChoiceQuestion</code> does.",
+          "Inherit with <code>: Question</code>, call <code>: base(text, points)</code>, and write four methods marked <code>override</code>. Tidy each answer with <code>Trim().ToUpper()</code> before comparing.",
+          "<code>public override bool CheckAnswer(string answer)<br>{<br>&nbsp;&nbsp;&nbsp;&nbsp;bool saidTrue = answer.Trim().ToUpper().StartsWith(\"T\");<br>&nbsp;&nbsp;&nbsp;&nbsp;return saidTrue == correctAnswer;<br>}</code>"
+        ],
+        mistakes: [
+          { wrong: "Forgetting <code>: base(text, points)</code> on the constructor.", fix: "<code>Question</code> has no empty constructor, so pass the text and points up with <code>: base(text, points)</code>." },
+          { wrong: "Missing <code>override</code> on one of the four methods, which gives an error that the abstract member isn't implemented.", fix: "All four need <code>public override</code>." },
+          { wrong: "Writing <code>correctAnswer = correctAnswer;</code> in the constructor.", fix: "The parameter shadows the field. Use <code>this.correctAnswer = correctAnswer;</code>" },
+          { wrong: "Trying <code>new Question(...)</code> in <code>Main</code>.", fix: "<code>Question</code> is abstract, so you can't create one. Create a <code>new TrueFalseQuestion(...)</code>." }
+        ]
       },
 
       // ================================================================ l7
@@ -1563,13 +1664,33 @@ if (type == "MC")
         starter: prog([...QUIZ_CLASSES, QUIZ_STUB], MAIN_L7),
         solution: prog([...QUIZ_CLASSES, QUIZ_V1], MAIN_L7),
         tests: [
-          { type: "output", includes: "Loaded 3 questions worth 4 points", msg: "The three good lines are worth 1 + 2 + 1 = 4 points." },
-          { type: "output", includes: "Skipped a badly formatted line: MC|Broken question|yes;no|5|1", msg: "Index 5 is out of range for 2 options: throw a FormatException." },
-          { type: "output", includes: "Skipped a line with missing parts: TF|Missing the points|True", msg: "A TF line with no points should be skipped as missing parts." },
-          { type: "output", includes: "Skipped a badly formatted line: TF|Not a real answer|Maybe|1", msg: "Maybe isn't True or False, so bool.Parse throws a FormatException." },
-          { type: "code", pattern: "Split\\(\\s*'\\|'\\s*\\)|Split\\(\\s*\"\\|\"\\s*\\)", msg: "Split the line at the | character." }
+          { type: "output", includes: "Loaded 3 questions worth 4 points", msg: "The three good lines are worth 1 + 2 + 1 = 4 points.", help: "This uses the pre-loaded <code>questions.txt</code>. The three good lines are worth 1 + 2 + 1, so it should print <code>Loaded 3 questions worth 4 points</code>. Check MC uses <code>parts[4]</code> for points and TF uses <code>parts[3]</code>." },
+          { type: "output", includes: "Skipped a badly formatted line: MC|Broken question|yes;no|5|1", msg: "Index 5 is out of range for 2 options: throw a FormatException.", help: "The line <code>MC|Broken question|yes;no|5|1</code> has index 5 but only 2 options. It should print <code>Skipped a badly formatted line: </code> and the line. Throw <code>new FormatException()</code> when the index is out of range." },
+          { type: "output", includes: "Skipped a line with missing parts: TF|Missing the points|True", msg: "A TF line with no points should be skipped as missing parts.", help: "The line <code>TF|Missing the points|True</code> has no points, so <code>parts[3]</code> doesn't exist. It should print <code>Skipped a line with missing parts: </code> and the line. Catch <code>IndexOutOfRangeException</code>." },
+          { type: "output", includes: "Skipped a badly formatted line: TF|Not a real answer|Maybe|1", msg: "Maybe isn't True or False, so bool.Parse throws a FormatException.", help: "The line <code>TF|Not a real answer|Maybe|1</code> should print <code>Skipped a badly formatted line: </code> and the line. Use <code>bool.Parse(parts[2])</code>, which throws a FormatException for Maybe." },
+          { type: "code", pattern: "Split\\(\\s*'\\|'\\s*\\)|Split\\(\\s*\"\\|\"\\s*\\)", msg: "Split the line at the | character.", help: "This check looks for <code>Split('|')</code> (or <code>Split(\"|\")</code>) in your code." }
         ],
-        hint: "Copy the MC example from the lesson, then do TF the same way with bool correct = bool.Parse(parts[2]); int points = int.Parse(parts[3]); End the method with throw new FormatException(); for unknown types."
+        hint: "Copy the MC example from the lesson, then do TF the same way with bool correct = bool.Parse(parts[2]); int points = int.Parse(parts[3]); End the method with throw new FormatException(); for unknown types.",
+        goal: "The program loads questions from questions.txt, skips any broken lines with a clear message, and reports how many good questions it loaded.",
+        steps: [
+          "Your <code>Question</code> classes from last lesson are here. Open <code>questions.txt</code> in the files panel to see the good and broken lines. Then scroll to the <code>Quiz</code> class.",
+          "In <code>ParseQuestion</code>, split the line: <code>string[] parts = line.Split('|');</code> and get the type with <code>parts[0].Trim().ToUpper()</code>.",
+          "For <code>MC</code>: split <code>parts[2]</code> on <code>';'</code>, parse <code>parts[3]</code> and <code>parts[4]</code> as ints, throw <code>new FormatException()</code> if the index is out of range, then return a <code>new MultipleChoiceQuestion(...)</code>.",
+          "For <code>TF</code>: <code>bool.Parse(parts[2])</code> and <code>int.Parse(parts[3])</code>, then return a <code>new TrueFalseQuestion(...)</code>. Keep <code>throw new FormatException();</code> at the very end for unknown types.",
+          "In <code>LoadFromFile</code>, replace the TODO with a <code>try</code> around <code>questions.Add(ParseQuestion(line));</code>",
+          "Add <code>catch (FormatException)</code> printing <code>Skipped a badly formatted line: </code> + line, and <code>catch (IndexOutOfRangeException)</code> printing <code>Skipped a line with missing parts: </code> + line. Run it."
+        ],
+        hints: [
+          "Each line becomes one question object. If a line is broken, an exception will happen, and you catch it inside the loop so the other lines still load.",
+          "Split on <code>'|'</code>, check <code>parts[0]</code> for <code>MC</code> or <code>TF</code>, and let <code>int.Parse</code>, <code>bool.Parse</code> and missing <code>parts[...]</code> throw. The try/catch goes in <code>LoadFromFile</code>, inside the <code>foreach</code>.",
+          "<code>if (type == \"TF\")<br>{<br>&nbsp;&nbsp;&nbsp;&nbsp;bool correct = bool.Parse(parts[2]);<br>&nbsp;&nbsp;&nbsp;&nbsp;int points = int.Parse(parts[3]);<br>&nbsp;&nbsp;&nbsp;&nbsp;return new TrueFalseQuestion(parts[1], correct, points);<br>}<br>throw new FormatException();</code>"
+        ],
+        mistakes: [
+          { wrong: "Splitting on a comma: <code>line.Split(',')</code>.", fix: "This file uses the pipe character: <code>line.Split('|')</code>. Options inside a question are split with <code>';'</code>." },
+          { wrong: "Putting the try/catch around the whole loop, so loading stops at the first broken line.", fix: "Put the <code>try</code> inside the <code>foreach</code>, round just <code>questions.Add(ParseQuestion(line));</code>." },
+          { wrong: "Forgetting to check the correct index, so <code>yes;no|5</code> is loaded.", fix: "After parsing, <code>if (correct &lt; 0 || correct &gt;= options.Length) throw new FormatException();</code>" },
+          { wrong: "Catching <code>Exception</code> first, so every broken line gets the same message.", fix: "Catch <code>FormatException</code> and <code>IndexOutOfRangeException</code> separately, each with its own message." }
+        ]
       },
 
       // ================================================================ l8
@@ -1611,13 +1732,33 @@ private void Shuffle()
         solution: prog([...QUIZ_CLASSES, QUIZ], MAIN_L8),
         stdin: ["T", "B", "T", "B"],
         tests: [
-          { type: "output", stdin: ["T", "B", "T", "B"], includes: "You scored 3 out of 3", msg: "Answering both questions correctly should print You scored 3 out of 3." },
-          { type: "output", stdin: ["F", "A", "F", "A"], includes: "You scored 0 out of 3", msg: "Wrong answers should score 0." },
-          { type: "outputRegex", stdin: ["T", "B", "T", "B"], pattern: "Question 1 of 2 \\(\\d points?\\)[\\s\\S]*Question 2 of 2", msg: "Print Question 1 of 2 (… point/points) before each question." },
-          { type: "fn", stdin: ["F", "A", "F", "A"], fn: (o) => o.includes("(2 points)") && o.includes("(1 point)") && o.includes("Wrong. The answer was True") && o.includes("Wrong. The answer was B) int"), msg: "Show (1 point)/(2 points), and Wrong. The answer was … for each wrong answer." },
-          { type: "code", pattern: "random\\.Next\\(", msg: "Use random.Next in Shuffle." }
+          { type: "output", stdin: ["T", "B", "T", "B"], includes: "You scored 3 out of 3", msg: "Answering both questions correctly should print You scored 3 out of 3.", help: "This uses the pre-loaded <code>questions.txt</code> with one MC (answer B, 1 point) and one TF (answer True, 2 points). Answering everything right should print <code>You scored 3 out of 3</code>. Check you add <code>q.Points</code> and <code>return score;</code>" },
+          { type: "output", stdin: ["F", "A", "F", "A"], includes: "You scored 0 out of 3", msg: "Wrong answers should score 0.", help: "Answering everything wrong should print <code>You scored 0 out of 3</code>. Only add points when <code>q.CheckAnswer(answer)</code> is true." },
+          { type: "outputRegex", stdin: ["T", "B", "T", "B"], pattern: "Question 1 of 2 \\(\\d points?\\)[\\s\\S]*Question 2 of 2", msg: "Print Question 1 of 2 (… point/points) before each question.", help: "Each question should start with <code>Question 1 of 2 (… point/points)</code>. Print it before <code>q.Display()</code> and increase <code>number</code> each time." },
+          { type: "fn", stdin: ["F", "A", "F", "A"], fn: (o) => o.includes("(2 points)") && o.includes("(1 point)") && o.includes("Wrong. The answer was True") && o.includes("Wrong. The answer was B) int"), msg: "Show (1 point)/(2 points), and Wrong. The answer was … for each wrong answer.", help: "With wrong answers, the output should show <code>(1 point)</code> and <code>(2 points)</code>, plus <code>Wrong. The answer was True</code> and <code>Wrong. The answer was B) int</code>. Use the plural trick and <code>q.CorrectAnswerText()</code>." },
+          { type: "code", pattern: "random\\.Next\\(", msg: "Use random.Next in Shuffle.", help: "This check looks for <code>random.Next(</code> in your code. Use the <code>random</code> field in Shuffle." }
         ],
-        hint: "Run: Shuffle(); int score = 0; int number = 1; foreach (Question q in questions) { ... number++; } return score;"
+        hint: "Run: Shuffle(); int score = 0; int number = 1; foreach (Question q in questions) { ... number++; } return score;",
+        goal: "The program shuffles the questions, asks each one with its number and points, checks and marks every answer, and shows the final score.",
+        steps: [
+          "Your <code>Quiz</code> class can already load questions (last lesson). Scroll to <code>Shuffle()</code> in <code>Quiz</code>.",
+          "Write the Fisher-Yates loop: <code>for (int i = questions.Count - 1; i &gt; 0; i--)</code>, pick <code>int j = random.Next(i + 1);</code> and swap <code>questions[i]</code> and <code>questions[j]</code> using a <code>temp</code> variable.",
+          "Find <code>Run()</code>. Start with <code>Shuffle();</code>, <code>int score = 0;</code> and <code>int number = 1;</code>, then <code>foreach (Question q in questions)</code>.",
+          "In the loop, print a blank line and <code>$\"Question {number} of {questions.Count} ({q.Points} point{(q.Points == 1 ? \"\" : \"s\")})\"</code>, then call <code>q.Display();</code>",
+          "Read the answer and copy the validation loop from lesson 6's <code>Main</code>: <code>while (!q.IsValidAnswer(answer))</code> re-ask with <code>That is not a valid answer. Try again: </code>",
+          "Mark it like lesson 6 (<code>Correct!</code> and add the points, or <code>Wrong. The answer was ...</code>), then <code>number++;</code>. After the loop, <code>return score;</code> Run it."
+        ],
+        hints: [
+          "You wrote the marking loop in <code>Main</code> two lessons ago. Now it moves into <code>Run()</code>, with a shuffle first and a question number on top.",
+          "Shuffle by walking backwards and swapping each item with a random one at or before it (<code>random.Next(i + 1)</code>). In <code>Run</code>, keep a <code>number</code> counter and return <code>score</code> at the end.",
+          "<code>for (int i = questions.Count - 1; i &gt; 0; i--)<br>{<br>&nbsp;&nbsp;&nbsp;&nbsp;int j = random.Next(i + 1);<br>&nbsp;&nbsp;&nbsp;&nbsp;Question temp = questions[i];<br>&nbsp;&nbsp;&nbsp;&nbsp;questions[i] = questions[j];<br>&nbsp;&nbsp;&nbsp;&nbsp;questions[j] = temp;<br>}</code>"
+        ],
+        mistakes: [
+          { wrong: "Leaving <code>return 0;</code> at the end of Run, so the score is always 0.", fix: "Return the running total: <code>return score;</code>" },
+          { wrong: "Swapping without a temporary variable (<code>questions[i] = questions[j]; questions[j] = questions[i];</code>), which loses a question.", fix: "Save one first: <code>Question temp = questions[i];</code> then swap." },
+          { wrong: "Making a <code>new Random()</code> inside Shuffle.", fix: "Use the <code>random</code> field that's already in the class." },
+          { wrong: "Forgetting <code>number++</code>, so every question says <code>Question 1 of 2</code>.", fix: "Add <code>number++;</code> at the end of the loop body." }
+        ]
       },
 
       // ================================================================ l9
@@ -1658,13 +1799,33 @@ File.AppendAllText(ScoresFile, record.ToFileLine() + Environment.NewLine);`)}
         starter: prog([...QUIZ_CLASSES, QUIZ, SR_STUB, SB_STUB], MAIN_L9),
         solution: prog([...QUIZ_CLASSES, QUIZ, SR, SB_V1], MAIN_L9),
         tests: [
-          { type: "output", includes: "Percentage: 75.0", msg: "3 out of 4 is Percentage: 75.0" },
-          { type: "output", includes: "File line: aoife,3,4,2026-10-27 14:30", msg: "ToFileLine should give aoife,3,4,2026-10-27 14:30" },
-          { type: "fn", fn: (o, c, f) => lines(f["scores.txt"]).slice(-1)[0] === "aoife,3,4,2026-10-27 14:30" && lines(f["scores.txt"]).length === 4, msg: "Save should append aoife,3,4,2026-10-27 14:30 as a new last line of scores.txt." },
-          { type: "outputRegex", pattern: "--- Scores for Aoife ---\\s*\\n21/10/2026 11:00\\s+aoife\\s+4/4\\s+100\\.0%\\s*\\n27/10/2026 14:30\\s+aoife\\s+3/4\\s+75\\.0%", msg: "ShowForUser(\"Aoife\") should list aoife's two records (and not ben's)." },
-          { type: "outputRegex", pattern: "--- Scores for oisin ---\\s*\\nNo quizzes taken yet\\.", msg: "oisin has no scores: print No quizzes taken yet." }
+          { type: "output", includes: "Percentage: 75.0", msg: "3 out of 4 is Percentage: 75.0", help: "Main makes a record of 3 out of 4, so it should print <code>Percentage: 75.0</code>. Cast to <code>double</code> before dividing." },
+          { type: "output", includes: "File line: aoife,3,4,2026-10-27 14:30", msg: "ToFileLine should give aoife,3,4,2026-10-27 14:30", help: "It should print <code>File line: aoife,3,4,2026-10-27 14:30</code>. Return the four parts joined by commas, with the date written using <code>DateFormat</code> and <code>CultureInfo.InvariantCulture</code>." },
+          { type: "fn", fn: (o, c, f) => lines(f["scores.txt"]).slice(-1)[0] === "aoife,3,4,2026-10-27 14:30" && lines(f["scores.txt"]).length === 4, msg: "Save should append aoife,3,4,2026-10-27 14:30 as a new last line of scores.txt.", help: "This check reads <code>scores.txt</code> (pre-loaded with three lines) after your program runs. <code>aoife,3,4,2026-10-27 14:30</code> should be added as the last line. Use <code>AppendAllText</code>, not WriteAllText." },
+          { type: "outputRegex", pattern: "--- Scores for Aoife ---\\s*\\n21/10/2026 11:00\\s+aoife\\s+4/4\\s+100\\.0%\\s*\\n27/10/2026 14:30\\s+aoife\\s+3/4\\s+75\\.0%", msg: "ShowForUser(\"Aoife\") should list aoife's two records (and not ben's).", help: "<code>ShowForUser(\"Aoife\")</code> should print the heading and aoife's two records but not ben's. Compare names with <code>.ToLower()</code> on both sides and print <code>r</code>." },
+          { type: "outputRegex", pattern: "--- Scores for oisin ---\\s*\\nNo quizzes taken yet\\.", msg: "oisin has no scores: print No quizzes taken yet.", help: "<code>oisin</code> has no scores, so it should print the heading then <code>No quizzes taken yet.</code> Use a counter and check it after the loop." }
         ],
-        hint: "ShowForUser: Console.WriteLine($\"\\n--- Scores for {username} ---\"); int count = 0; foreach (ScoreRecord r in LoadAll()) { if (r.Username.ToLower() == username.ToLower()) { Console.WriteLine(r); count++; } }"
+        hint: "ShowForUser: Console.WriteLine($\"\\n--- Scores for {username} ---\"); int count = 0; foreach (ScoreRecord r in LoadAll()) { if (r.Username.ToLower() == username.ToLower()) { Console.WriteLine(r); count++; } }",
+        goal: "The program works out a score as a percentage, saves each quiz attempt to scores.txt, and lists a user's past scores.",
+        steps: [
+          "Your Quiz from the last two lessons is here unchanged. Scroll to <code>ScoreRecord</code> and find the <code>Percentage</code> property.",
+          "Replace its TODO with <code>if (Total == 0) return 0;</code> and <code>return (double)Score / Total * 100;</code> Run it: you should see <code>Percentage: 75.0</code>.",
+          "Find <code>ToFileLine()</code> and return <code>$\"{Username},{Score},{Total},{Date.ToString(DateFormat, CultureInfo.InvariantCulture)}\"</code>.",
+          "Scroll to <code>ScoreBoard.Save</code> and write <code>File.AppendAllText(ScoresFile, record.ToFileLine() + Environment.NewLine);</code>",
+          "In <code>ShowForUser</code>, print <code>$\"\\n--- Scores for {username} ---\"</code>, then loop <code>foreach (ScoreRecord r in LoadAll())</code> and print <code>r</code> when the usernames match (ignoring case). Count them.",
+          "After the loop, if the count is 0 print <code>No quizzes taken yet.</code> Run it."
+        ],
+        hints: [
+          "A record turns itself into a file line; the scoreboard adds that line to the file and later reads every line back to show one person's results.",
+          "Cast to <code>double</code> before dividing in <code>Percentage</code>. Use <code>AppendAllText</code> (not WriteAllText) so old scores are kept. In <code>ShowForUser</code>, use a counter to know if you found any.",
+          "<code>int count = 0;<br>foreach (ScoreRecord r in LoadAll())<br>{<br>&nbsp;&nbsp;&nbsp;&nbsp;if (r.Username.ToLower() == username.ToLower())<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine(r);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count++;<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>}<br>if (count == 0) Console.WriteLine(\"No quizzes taken yet.\");</code>"
+        ],
+        mistakes: [
+          { wrong: "Writing <code>Score / Total * 100</code> without the cast, so 3 / 4 becomes 0.", fix: "Cast first: <code>(double)Score / Total * 100</code>." },
+          { wrong: "Using <code>File.WriteAllText</code> in Save, which wipes all the old scores.", fix: "Use <code>File.AppendAllText</code> and add <code>Environment.NewLine</code>." },
+          { wrong: "Writing the date as <code>{Date}</code>, which gives a different format on different computers.", fix: "Use <code>Date.ToString(DateFormat, CultureInfo.InvariantCulture)</code>." },
+          { wrong: "Printing <code>No quizzes taken yet.</code> inside the loop.", fix: "Decide after the loop, using the counter." }
+        ]
       },
 
       // ================================================================ l10
@@ -1711,13 +1872,33 @@ for (int i = 0; i < records.Count && i < howMany; i++)
         starter: prog([...QUIZ_CLASSES, QUIZ, SR, SB_STUB2], MAIN_L10),
         solution: prog([...QUIZ_CLASSES, QUIZ, SR, SB], MAIN_L10),
         tests: [
-          { type: "outputRegex", pattern: "--- Top 3 ---\\s*\\n1\\. .*aoife.*100\\.0%\\s*\\n2\\. .*niamh.*87\\.5%\\s*\\n3\\. .*grace.*83\\.3%", msg: "Top 3 should be 1. aoife, 2. niamh, 3. grace." },
-          { type: "fn", fn: (o) => { const top3 = (o.split("--- Top 3 ---")[1] || "").split("--- Top 10 ---")[0]; return !/oisin|ben/.test(top3); }, msg: "Only 3 records should be shown in the Top 3." },
-          { type: "outputRegex", pattern: "--- Top 10 ---[\\s\\S]*4\\. .*ben[\\s\\S]*5\\. .*oisin", msg: "Top 10 shows all 5 records, ending 4. ben, 5. oisin." },
-          { type: "fn", fn: (o) => !/\n6\. /.test(o), msg: "Don't print more records than there are (no 6.)." },
-          { type: "code", pattern: "\\w+\\[\\s*i\\s*\\]\\s*=\\s*\\w+\\[\\s*i\\s*\\+\\s*1\\s*\\]", msg: "Swap neighbouring records, e.g. records[i] = records[i + 1], using a temporary variable." }
+          { type: "outputRegex", pattern: "--- Top 3 ---\\s*\\n1\\. .*aoife.*100\\.0%\\s*\\n2\\. .*niamh.*87\\.5%\\s*\\n3\\. .*grace.*83\\.3%", msg: "Top 3 should be 1. aoife, 2. niamh, 3. grace.", help: "This uses the pre-loaded <code>scores.txt</code>. The Top 3 should be <code>1. aoife</code> (100%), <code>2. niamh</code> (87.5%), <code>3. grace</code> (83.3%). Check you sort with <code>&lt;</code> so the highest comes first." },
+          { type: "fn", fn: (o) => { const top3 = (o.split("--- Top 3 ---")[1] || "").split("--- Top 10 ---")[0]; return !/oisin|ben/.test(top3); }, msg: "Only 3 records should be shown in the Top 3.", help: "Only 3 records should appear under <code>--- Top 3 ---</code>. Stop the print loop when <code>i</code> reaches <code>howMany</code>." },
+          { type: "outputRegex", pattern: "--- Top 10 ---[\\s\\S]*4\\. .*ben[\\s\\S]*5\\. .*oisin", msg: "Top 10 shows all 5 records, ending 4. ben, 5. oisin.", help: "The Top 10 should show all 5 records, ending with <code>4. ben</code> and <code>5. oisin</code>. Make sure the print loop also stops at <code>records.Count</code>." },
+          { type: "fn", fn: (o) => !/\n6\. /.test(o), msg: "Don't print more records than there are (no 6.).", help: "There are only 5 records, so no line should start with <code>6.</code> Use <code>i &lt; records.Count &amp;&amp; i &lt; howMany</code>." },
+          { type: "code", pattern: "\\w+\\[\\s*i\\s*\\]\\s*=\\s*\\w+\\[\\s*i\\s*\\+\\s*1\\s*\\]", msg: "Swap neighbouring records, e.g. records[i] = records[i + 1], using a temporary variable.", help: "This check looks for a swap of neighbours like <code>records[i] = records[i + 1]</code>. Write your own bubble sort rather than using <code>Sort()</code>." }
         ],
-        hint: "Two nested for loops: outer for each pass, inner from 0 to records.Count - 1 - pass. If records[i].Percentage < records[i + 1].Percentage, swap them."
+        hint: "Two nested for loops: outer for each pass, inner from 0 to records.Count - 1 - pass. If records[i].Percentage < records[i + 1].Percentage, swap them.",
+        goal: "The program sorts every saved score from best to worst and shows a numbered leaderboard of the top few.",
+        steps: [
+          "Your <code>ScoreBoard</code> can already save and show scores (last lesson). Scroll to <code>ShowLeaderboard</code>.",
+          "Under the first TODO, write the outer loop: <code>for (int pass = 0; pass &lt; records.Count - 1; pass++)</code>",
+          "Inside it, write the inner loop: <code>for (int i = 0; i &lt; records.Count - 1 - pass; i++)</code>",
+          "Inside that, if <code>records[i].Percentage &lt; records[i + 1].Percentage</code>, swap them using <code>ScoreRecord temp = records[i];</code>",
+          "Under the second TODO, print <code>$\"\\n--- Top {howMany} ---\"</code>, and <code>No scores yet.</code> if the list is empty.",
+          "Loop <code>for (int i = 0; i &lt; records.Count &amp;&amp; i &lt; howMany; i++)</code> printing <code>$\"{i + 1}. {records[i]}\"</code>. Run it."
+        ],
+        hints: [
+          "Compare each pair of neighbours and swap them if they're the wrong way round. Repeat until no big ones are left behind.",
+          "Use two nested <code>for</code> loops and a <code>temp</code> variable for the swap. Use <code>&lt;</code> to put the highest first. When printing, stop at whichever comes first: the end of the list or <code>howMany</code>.",
+          "<code>if (records[i].Percentage &lt; records[i + 1].Percentage)<br>{<br>&nbsp;&nbsp;&nbsp;&nbsp;ScoreRecord temp = records[i];<br>&nbsp;&nbsp;&nbsp;&nbsp;records[i] = records[i + 1];<br>&nbsp;&nbsp;&nbsp;&nbsp;records[i + 1] = temp;<br>}</code>"
+        ],
+        mistakes: [
+          { wrong: "Using <code>&gt;</code> in the comparison, which sorts lowest first.", fix: "For a leaderboard, swap when the left one is <em>smaller</em>: <code>&lt;</code>." },
+          { wrong: "Inner loop going to <code>i &lt; records.Count</code>, which crashes on <code>records[i + 1]</code>.", fix: "Stop one early: <code>i &lt; records.Count - 1 - pass</code>." },
+          { wrong: "Printing with <code>i &lt; howMany</code> only, which crashes when there are fewer records than <code>howMany</code>.", fix: "Use both conditions: <code>i &lt; records.Count &amp;&amp; i &lt; howMany</code>." },
+          { wrong: "Numbering from 0, giving <code>0. aoife</code>.", fix: "Print <code>{i + 1}</code>." }
+        ]
       },
 
       // ================================================================ l11
@@ -1772,13 +1953,34 @@ Console.WriteLine("Goodbye!");`)}
         solution: full(ALL_BUT_PROGRAM, PROGRAM_V1),
         stdin: ["2", "grace", "Rugby2026", "1", "T", "4", "3"],
         tests: [
-          { type: "outputRegex", stdin: ["7", "menu", "3"], pattern: "C# QUIZ - MENU[\\s\\S]*Please enter a whole number from 1 to 3[\\s\\S]*Please enter a whole number from 1 to 3[\\s\\S]*Goodbye!", msg: "Show the menu, reject 7 and menu with Please enter a whole number from 1 to 3:, then Exit with Goodbye!" },
-          { type: "fn", stdin: ["2", "grace", "Rugby2026", "1", "T", "4", "3"], fn: (o, c, f) => o.includes("Welcome back, grace!") && o.includes("You scored 2 out of 2 (100.0%)") && o.includes("You have been logged out.") && /grace,2,2,/.test(f["scores.txt"] || ""), msg: "Log in as grace, take the quiz (2 out of 2, saved to scores.txt), then log out." },
-          { type: "fn", stdin: ["2", "grace", "Rugby2026", "9", "2", "3", "4", "3"], fn: (o) => o.includes("Please enter a whole number from 1 to 4") && o.includes("--- Scores for grace ---") && o.includes("--- Top 5 ---") && o.includes("Goodbye!"), msg: "The user menu should reject 9, then show My scores (2) and the Leaderboard (3)." },
-          { type: "fn", stdin: ["1", "oisin", "Pass1234", "Pass1234", "2", "oisin", "Pass1234", "4", "3"], fn: (o, c, f) => o.includes("Account created. You can now log in.") && o.includes("Welcome back, oisin!") && (f["users.txt"] || "").includes("oisin," + H.Pass1234), msg: "Option 1 should register oisin, who can then log in." },
-          { type: "output", stdin: ["2", "grace", "a", "grace", "b", "grace", "c", "3"], includes: "Too many failed attempts.", msg: "Option 2 should lead to the login screen (three wrong passwords lock you out)." }
+          { type: "outputRegex", stdin: ["7", "menu", "3"], pattern: "C# QUIZ - MENU[\\s\\S]*Please enter a whole number from 1 to 3[\\s\\S]*Please enter a whole number from 1 to 3[\\s\\S]*Goodbye!", msg: "Show the menu, reject 7 and menu with Please enter a whole number from 1 to 3:, then Exit with Goodbye!", help: "This feeds in <code>7</code>, <code>menu</code>, then <code>3</code>. It should show the menu, reject 7 and menu with <code>Please enter a whole number from 1 to 3</code>, then print <code>Goodbye!</code> Write the TryParse loop in GetIntInRange and use it in Main." },
+          { type: "fn", stdin: ["2", "grace", "Rugby2026", "1", "T", "4", "3"], fn: (o, c, f) => o.includes("Welcome back, grace!") && o.includes("You scored 2 out of 2 (100.0%)") && o.includes("You have been logged out.") && /grace,2,2,/.test(f["scores.txt"] || ""), msg: "Log in as grace, take the quiz (2 out of 2, saved to scores.txt), then log out.", help: "This logs in as <code>grace</code>, takes the quiz (answer T), then logs out and exits. It needs <code>Welcome back, grace!</code>, <code>You scored 2 out of 2</code>, <code>You have been logged out.</code> and a new line in <code>scores.txt</code>. Check case 2 calls UserMenu, and UserMenu case 1 calls <code>TakeQuiz(user)</code>." },
+          { type: "fn", stdin: ["2", "grace", "Rugby2026", "9", "2", "3", "4", "3"], fn: (o) => o.includes("Please enter a whole number from 1 to 4") && o.includes("--- Scores for grace ---") && o.includes("--- Top 5 ---") && o.includes("Goodbye!"), msg: "The user menu should reject 9, then show My scores (2) and the Leaderboard (3).", help: "This logs in as grace, types 9 at the user menu, then chooses 2 and 3. It needs the 1 to 4 error message, <code>--- Scores for grace ---</code> and <code>--- Top 5 ---</code>. Use <code>GetIntInRange(..., 1, 4)</code> and wire up cases 2 and 3." },
+          { type: "fn", stdin: ["1", "oisin", "Pass1234", "Pass1234", "2", "oisin", "Pass1234", "4", "3"], fn: (o, c, f) => o.includes("Account created. You can now log in.") && o.includes("Welcome back, oisin!") && (f["users.txt"] || "").includes("oisin," + H.Pass1234), msg: "Option 1 should register oisin, who can then log in.", help: "This chooses 1 to register <code>oisin</code>, then logs in as him. Case 1 must call <code>RegisterScreen()</code>, and the menu must loop back afterwards." },
+          { type: "output", stdin: ["2", "grace", "a", "grace", "b", "grace", "c", "3"], includes: "Too many failed attempts.", msg: "Option 2 should lead to the login screen (three wrong passwords lock you out).", help: "This chooses 2 and types three wrong passwords for grace. It should print <code>Too many failed attempts.</code> Make sure case 2 calls <code>LoginScreen()</code>." }
         ],
-        hint: "GetIntInRange is the same as in the validation module. For UserMenu, copy the shape of the main menu loop: bool loggedIn = true; while (loggedIn) { ...print options...; int choice = GetIntInRange(\"Choose an option: \", 1, 4); switch (choice) { ... } }"
+        hint: "GetIntInRange is the same as in the validation module. For UserMenu, copy the shape of the main menu loop: bool loggedIn = true; while (loggedIn) { ...print options...; int choice = GetIntInRange(\"Choose an option: \", 1, 4); switch (choice) { ... } }",
+        goal: "The program shows a main menu (register, log in, exit) and, after logging in, a user menu to take the quiz, see scores or the leaderboard, and log out, never crashing on bad input.",
+        steps: [
+          "Every class you've built (User, UserManager, the Questions, Quiz, ScoreRecord, ScoreBoard) is above. Scroll down to the <code>Program</code> class, to <code>GetIntInRange</code> at the bottom.",
+          "Write <code>GetIntInRange</code> exactly as in the validation module: show the prompt, loop with <code>int.TryParse</code> and the <code>min</code>/<code>max</code> checks, then <code>return value;</code>",
+          "Go to <code>Main</code>. Write <code>bool running = true;</code> and <code>while (running)</code>, printing the menu lines shown in the TODO comment.",
+          "Get the choice with <code>GetIntInRange(\"Choose an option: \", 1, 3)</code> and add a <code>switch</code>: case 1 calls <code>RegisterScreen()</code>, case 2 calls <code>LoginScreen()</code> and then <code>UserMenu(user)</code> if it isn't <code>null</code>, case 3 sets <code>running = false</code>.",
+          "After the loop print <code>Goodbye!</code> Run it and type <code>3</code> to check.",
+          "Write <code>UserMenu</code> the same way with <code>bool loggedIn = true;</code>, the four options and <code>GetIntInRange(\"Choose an option: \", 1, 4)</code>. Case 4 prints <code>You have been logged out.</code> and sets <code>loggedIn = false</code>.",
+          "Run it: log in as <code>grace</code> / <code>Rugby2026</code>, take the quiz, look at your scores, then log out and exit."
+        ],
+        hints: [
+          "A menu is a loop that shows options, gets a safe number, does one thing, and repeats until the user chooses to leave.",
+          "Use a <code>bool</code> flag with a <code>while</code> loop, <code>GetIntInRange</code> for the choice, and a <code>switch</code> with one <code>case</code> per option (each ending in <code>break;</code>).",
+          "<code>case 2:<br>&nbsp;&nbsp;&nbsp;&nbsp;User user = LoginScreen();<br>&nbsp;&nbsp;&nbsp;&nbsp;if (user != null)<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UserMenu(user);<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;&nbsp;&nbsp;break;</code>"
+        ],
+        mistakes: [
+          { wrong: "Leaving <code>return min;</code> in GetIntInRange, so every choice is option 1.", fix: "Write the TryParse loop and <code>return value;</code>" },
+          { wrong: "Forgetting <code>break;</code> at the end of a <code>case</code>, which won't compile in C#.", fix: "End every case with <code>break;</code>" },
+          { wrong: "Calling <code>UserMenu(user)</code> without checking for <code>null</code>.", fix: "<code>LoginScreen</code> returns <code>null</code> after three failed tries, so wrap the call in <code>if (user != null)</code>." },
+          { wrong: "Printing <code>Goodbye!</code> inside the loop.", fix: "Put it after the <code>while</code> loop's closing <code>}</code>." }
+        ]
       },
 
       // ================================================================ l12
@@ -1833,13 +2035,33 @@ static string ReadPassword()
         solution: full(ALL_BUT_PROGRAM, PROGRAM_V2),
         stdin: ["2", "grace", "Rugby2026", "4", "3"],
         tests: [
-          { type: "output", stdin: ["2", "grace", "Rugby2026", "4", "3"], includes: "Password: *********\n", msg: "Typing Rugby2026 should show Password: ********* (9 stars) and then a new line." },
-          { type: "output", stdin: ["2", "grace", "Rugby2026", "4", "3"], includes: "Welcome back, grace!", msg: "The masked password should still log grace in." },
-          { type: "output", stdin: ["2", "grace", "Rugby20266\b", "4", "3"], includes: "Welcome back, grace!", msg: "Typing an extra 6 and pressing Backspace should remove it, so grace still logs in." },
-          { type: "code", pattern: "ReadKey\\(\\s*true\\s*\\)", msg: "Use Console.ReadKey(true) so keys aren't shown." },
-          { type: "code", pattern: "ConsoleKey\\.Backspace", msg: "Handle ConsoleKey.Backspace." }
+          { type: "output", stdin: ["2", "grace", "Rugby2026", "4", "3"], includes: "Password: *********\n", msg: "Typing Rugby2026 should show Password: ********* (9 stars) and then a new line.", help: "This logs in as grace with <code>Rugby2026</code>. It should show <code>Password: *********</code> (9 stars) and then a new line. Write <code>*</code> for each character and <code>Console.WriteLine()</code> after the loop." },
+          { type: "output", stdin: ["2", "grace", "Rugby2026", "4", "3"], includes: "Welcome back, grace!", msg: "The masked password should still log grace in.", help: "With the masked password, grace should still log in and see <code>Welcome back, grace!</code> Make sure you add <code>key.KeyChar</code> to <code>password</code> and return it." },
+          { type: "output", stdin: ["2", "grace", "Rugby20266\b", "4", "3"], includes: "Welcome back, grace!", msg: "Typing an extra 6 and pressing Backspace should remove it, so grace still logs in.", help: "This types <code>Rugby20266</code> then Backspace. The extra 6 should be removed, so grace still logs in. Handle <code>ConsoleKey.Backspace</code> with <code>Substring(0, password.Length - 1)</code>." },
+          { type: "code", pattern: "ReadKey\\(\\s*true\\s*\\)", msg: "Use Console.ReadKey(true) so keys aren't shown.", help: "This check looks for <code>ReadKey(true)</code> in your code." },
+          { type: "code", pattern: "ConsoleKey\\.Backspace", msg: "Handle ConsoleKey.Backspace.", help: "This check looks for <code>ConsoleKey.Backspace</code> in your code." }
         ],
-        hint: "ConsoleKeyInfo key = Console.ReadKey(true); while (key.Key != ConsoleKey.Enter) { ... key = Console.ReadKey(true); } Don't forget to read the next key at the end of the loop, or it will never stop!"
+        hint: "ConsoleKeyInfo key = Console.ReadKey(true); while (key.Key != ConsoleKey.Enter) { ... key = Console.ReadKey(true); } Don't forget to read the next key at the end of the loop, or it will never stop!",
+        goal: "The login and register screens show a star for each character of your password instead of the password itself, and Backspace works.",
+        steps: [
+          "Your whole program with menus from last lesson is here. Scroll to <code>ReadPassword</code> at the bottom of <code>Program</code>.",
+          "Replace its body: start with <code>string password = \"\";</code> and <code>ConsoleKeyInfo key = Console.ReadKey(true);</code>",
+          "Add <code>while (key.Key != ConsoleKey.Enter)</code>. As the <strong>last</strong> line inside the loop, read the next key: <code>key = Console.ReadKey(true);</code>",
+          "Inside the loop, before that line, handle a normal key: <code>else if (!char.IsControl(key.KeyChar))</code> adds <code>key.KeyChar</code> to <code>password</code> and writes <code>*</code>.",
+          "Handle Backspace first: <code>if (key.Key == ConsoleKey.Backspace)</code>, and if <code>password.Length &gt; 0</code>, remove the last character with <code>Substring</code> and write <code>\"\\b \\b\"</code>.",
+          "After the loop, <code>Console.WriteLine();</code> and <code>return password;</code> Run it and log in as grace."
+        ],
+        hints: [
+          "Instead of reading a whole line, read one key at a time, hide it, and show a star. Stop when the key is Enter.",
+          "Use <code>Console.ReadKey(true)</code> before the loop and again at the end of the loop. Check <code>key.Key</code> for Enter and Backspace, and use <code>key.KeyChar</code> for the character.",
+          "<code>if (key.Key == ConsoleKey.Backspace)<br>{<br>&nbsp;&nbsp;&nbsp;&nbsp;if (password.Length &gt; 0)<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;password = password.Substring(0, password.Length - 1);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Console.Write(\"\\b \\b\");<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>}</code>"
+        ],
+        mistakes: [
+          { wrong: "Forgetting to read the next key at the end of the loop, so it never stops.", fix: "The last line inside the <code>while</code> must be <code>key = Console.ReadKey(true);</code>" },
+          { wrong: "Using <code>Console.ReadKey()</code> without <code>true</code>, so the real characters still show.", fix: "Pass <code>true</code> to hide the key: <code>Console.ReadKey(true)</code>." },
+          { wrong: "Adding Backspace to the password as a character.", fix: "Check for <code>ConsoleKey.Backspace</code> first, and only add characters in the <code>else if</code>." },
+          { wrong: "Forgetting <code>Console.WriteLine();</code> after the loop, so the next message appears on the same line as the stars.", fix: "Add <code>Console.WriteLine();</code> just before <code>return password;</code>" }
+        ]
       },
 
       // ================================================================ l13
@@ -1876,14 +2098,34 @@ namespace QuizApp;`)}
         solution: full(ALL_BUT_PROGRAM, PROGRAM_V3, "namespace QuizApp;"),
         stdin: ["2", "grace", "Rugby2026", "1", "T", "B", "T", "B", "4", "3"],
         tests: [
-          { type: "outputRegex", stdin: ["2", "grace", "Rugby2026", "1", "T", "B", "T", "B", "4", "3"], pattern: "You scored 3 out of 3 \\(100\\.0%\\)\\s*\\nOutstanding - you really know your C#!", msg: "3 out of 3 should print Outstanding - you really know your C#! straight after the score." },
-          { type: "output", stdin: ["2", "grace", "Rugby2026", "1", "T", "A", "T", "A", "4", "3"], includes: "A solid pass - revisit the parts you missed.", msg: "2 out of 3 (66.7%) should print A solid pass - revisit the parts you missed." },
-          { type: "output", stdin: ["2", "grace", "Rugby2026", "1", "F", "B", "F", "4", "3"], includes: "Keep practising - work back through the tutorial and try again.", msg: "1 out of 3 (33.3%) should print Keep practising - work back through the tutorial and try again." },
-          { type: "fn", stdin: ["2", "grace", "Rugby2026", "3", "4", "3"], fn: (o) => /--- Top 5 ---\s*\n1\. .*aoife/.test(o) && o.includes("Goodbye!"), msg: "The leaderboard should still work (aoife on top)." },
-          { type: "code", pattern: "namespace\\s+QuizApp", msg: "Add namespace QuizApp;" },
-          { type: "code", pattern: "Great work - just a few to review\\.", msg: "Include the Great work - just a few to review. message for 70 or more." }
+          { type: "outputRegex", stdin: ["2", "grace", "Rugby2026", "1", "T", "B", "T", "B", "4", "3"], pattern: "You scored 3 out of 3 \\(100\\.0%\\)\\s*\\nOutstanding - you really know your C#!", msg: "3 out of 3 should print Outstanding - you really know your C#! straight after the score.", help: "This logs in as grace and gets 3 out of 3. <code>Outstanding - you really know your C#!</code> should appear on the line straight after <code>You scored 3 out of 3 (100.0%)</code>. Print GetFeedback right after that line in TakeQuiz." },
+          { type: "output", stdin: ["2", "grace", "Rugby2026", "1", "T", "A", "T", "A", "4", "3"], includes: "A solid pass - revisit the parts you missed.", msg: "2 out of 3 (66.7%) should print A solid pass - revisit the parts you missed.", help: "This scores 2 out of 3 (66.7%), so it should print <code>A solid pass - revisit the parts you missed.</code> Check your bands are in order 90, 70, 50." },
+          { type: "output", stdin: ["2", "grace", "Rugby2026", "1", "F", "B", "F", "4", "3"], includes: "Keep practising - work back through the tutorial and try again.", msg: "1 out of 3 (33.3%) should print Keep practising - work back through the tutorial and try again.", help: "This scores 1 out of 3 (33.3%), so it should print <code>Keep practising - work back through the tutorial and try again.</code> Add a final <code>return</code> for below 50." },
+          { type: "fn", stdin: ["2", "grace", "Rugby2026", "3", "4", "3"], fn: (o) => /--- Top 5 ---\s*\n1\. .*aoife/.test(o) && o.includes("Goodbye!"), msg: "The leaderboard should still work (aoife on top).", help: "This logs in and opens the leaderboard. It should still show <code>--- Top 5 ---</code> with aoife first, then <code>Goodbye!</code> If this fails, check the namespace line hasn't broken anything else." },
+          { type: "code", pattern: "namespace\\s+QuizApp", msg: "Add namespace QuizApp;", help: "This check looks for <code>namespace QuizApp</code> in your code." },
+          { type: "code", pattern: "Great work - just a few to review\\.", msg: "Include the Great work - just a few to review. message for 70 or more.", help: "This check looks for the exact text <code>Great work - just a few to review.</code> in your code, for the 70 or more band." }
         ],
-        hint: "if (percentage >= 90) return \"Outstanding - you really know your C#!\"; if (percentage >= 70) return ...; and so on, with a final return for below 50."
+        hint: "if (percentage >= 90) return \"Outstanding - you really know your C#!\"; if (percentage >= 70) return ...; and so on, with a final return for below 50.",
+        goal: "The finished quiz app gives an encouraging message after every quiz based on your percentage, with all classes inside the QuizApp namespace.",
+        steps: [
+          "This is your complete program from the last two lessons, with masked passwords. Find <code>// TODO: add the namespace line here</code> near the top and replace it with <code>namespace QuizApp;</code>",
+          "Scroll to <code>// TODO: static string GetFeedback(double percentage)</code> in the <code>Program</code> class.",
+          "Write the method, checking the highest boundary first: <code>if (percentage &gt;= 90) return \"Outstanding - you really know your C#!\";</code>",
+          "Add the <code>&gt;= 70</code> and <code>&gt;= 50</code> lines with their messages, and a final <code>return</code> for below 50.",
+          "In <code>TakeQuiz</code>, replace <code>// TODO: print GetFeedback...</code> with <code>Console.WriteLine(GetFeedback(record.Percentage));</code>",
+          "Run it, log in as grace / <code>Rugby2026</code>, and take the quiz a few times with different answers."
+        ],
+        hints: [
+          "Pick one of four messages based on the percentage. Start from the top band and work down, so each score gets caught by the first band it fits.",
+          "Use a chain of <code>if (...) return ...;</code> lines from 90 down to 50, then a plain <code>return</code> at the end. Call the method straight after the <code>You scored</code> line.",
+          "<code>if (percentage &gt;= 90) return \"Outstanding - you really know your C#!\";<br>if (percentage &gt;= 70) return \"Great work - just a few to review.\";<br>if (percentage &gt;= 50) return \"A solid pass - revisit the parts you missed.\";</code>"
+        ],
+        mistakes: [
+          { wrong: "Checking <code>&gt;= 50</code> first, so 100% gets the solid pass message.", fix: "Check the highest boundary first: 90, then 70, then 50." },
+          { wrong: "Forgetting the final <code>return</code> for below 50, which gives \"not all code paths return a value\".", fix: "End the method with <code>return \"Keep practising - work back through the tutorial and try again.\";</code>" },
+          { wrong: "Writing <code>namespace QuizApp</code> without the semicolon, or above the <code>using</code> lines.", fix: "Put <code>namespace QuizApp;</code> after the <code>using</code> lines, with a semicolon." },
+          { wrong: "Using a different dash or missing the full stop in a message.", fix: "Copy the messages exactly from the table: a plain hyphen <code>-</code> and the full stop at the end." }
+        ]
       },
 
       // ================================================================ l14

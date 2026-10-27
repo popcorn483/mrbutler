@@ -82,13 +82,33 @@ else
 Console.WriteLine("Have a good day.");`),
         stdin: ["25"],
         tests: [
-          { type: "output", stdin: ["25"], includes: "Shorts weather!", msg: "When the temperature is 25 it should print Shorts weather!" },
-          { type: "fn", stdin: ["25"], fn: (out) => !/jumper/i.test(out), msg: "When it's 25, don't print Bring a jumper!" },
-          { type: "output", stdin: ["20"], includes: "Bring a jumper!", msg: "20 is not greater than 20, so it should print Bring a jumper!" },
-          { type: "output", stdin: ["8"], includes: "Have a good day.", msg: "Always print Have a good day. at the end." },
-          { type: "code", pattern: "else", msg: "Use an else block." }
+          { type: "output", stdin: ["25"], includes: "Shorts weather!", msg: "When the temperature is 25 it should print Shorts weather!", help: "When the temperature entered is <code>25</code>, your program should print <code>Shorts weather!</code>. Check your condition is <code>temp &gt; 20</code> and the message is spelled exactly right." },
+          { type: "fn", stdin: ["25"], fn: (out) => !/jumper/i.test(out), msg: "When it's 25, don't print Bring a jumper!", help: "When the temperature entered is <code>25</code>, the jumper message must not appear. Make sure <code>Bring a jumper!</code> is inside an <code>else</code> block, not on its own after the <code>if</code>." },
+          { type: "output", stdin: ["20"], includes: "Bring a jumper!", msg: "20 is not greater than 20, so it should print Bring a jumper!", help: "When the temperature entered is <code>20</code>, your program should print <code>Bring a jumper!</code>. 20 is not greater than 20, so check you used <code>&gt;</code> and not <code>&gt;=</code>." },
+          { type: "output", stdin: ["8"], includes: "Have a good day.", msg: "Always print Have a good day. at the end.", help: "When the temperature entered is <code>8</code>, your program should still end with <code>Have a good day.</code>. Put that line after the whole if/else, not inside it." },
+          { type: "code", pattern: "else", msg: "Use an else block.", help: "The checker looks for the word <code>else</code> in your code. Use an <code>else</code> block for the jumper message rather than a second <code>if</code>." }
         ],
-        hint: "if (temp > 20) { ... } else { ... } and then put the last WriteLine after the closing bracket of the else."
+        hint: "if (temp > 20) { ... } else { ... } and then put the last WriteLine after the closing bracket of the else.",
+        goal: "The program asks for the temperature, tells you whether it's shorts weather or jumper weather, and then always says Have a good day.",
+        steps: [
+          "Find the line <code>// TODO: if temp is greater than 20</code>. You'll write your code just under it.",
+          "Type the condition <code>if (temp &gt; 20)</code> with a pair of curly brackets <code>{ }</code> on the lines underneath.",
+          "Inside those brackets, print <code>Shorts weather!</code> with <code>Console.WriteLine(\"Shorts weather!\");</code>. Press <strong>Run</strong> and type 25: you should see it.",
+          "Straight after the closing <code>}</code>, type <code>else</code> with its own pair of curly brackets.",
+          "Inside the <code>else</code> brackets, print <code>Bring a jumper!</code>. Run it again and type 8 to check.",
+          "Under the <code>// TODO: always print</code> comment (outside both sets of brackets), print <code>Have a good day.</code>. Run with 25 and with 8: both should end with that line."
+        ],
+        hints: [
+          "There are two possible messages and only one should appear. That's a job for <code>if</code> and <code>else</code>.",
+          "Use <code>if (temp &gt; 20)</code> for the shorts message and a plain <code>else</code> for the jumper message. The last <code>WriteLine</code> goes after the <code>else</code> block finishes.",
+          "<code>if (temp &gt; 20)\n{\n    Console.WriteLine(\"Shorts weather!\");\n}\nelse\n{\n    Console.WriteLine(\"Bring a jumper!\");\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Putting a semicolon after the condition: <code>if (temp &gt; 20);</code>", fix: "Remove the semicolon. It ends the <code>if</code> straight away, so the brackets underneath always run." },
+          { wrong: "Using <code>&gt;=</code> instead of <code>&gt;</code>, so 20 counts as shorts weather.", fix: "The task says <em>greater than</em> 20, so 20 itself should get the jumper message. Use <code>temp &gt; 20</code>." },
+          { wrong: "Putting <code>Have a good day.</code> inside the <code>else</code> brackets.", fix: "Move it below the final <code>}</code> of the <code>else</code> so it runs every time, whatever the temperature." },
+          { wrong: "Spelling the messages slightly differently, e.g. <code>Shorts Weather</code> without the <code>!</code>.", fix: "Copy the exact wording from the instructions, including capitals and punctuation." }
+        ]
       },
 
       // ---------------------------------------------------------------- l2
@@ -162,15 +182,35 @@ else
 }`),
         stdin: ["85"],
         tests: [
-          { type: "fn", stdin: ["85"], fn: (out) => /Grade A/.test(out) && count(out, "Grade") === 1, msg: "A mark of 85 should print only Grade A." },
-          { type: "fn", stdin: ["70"], fn: (out) => /Grade A/.test(out) && count(out, "Grade") === 1, msg: "A mark of exactly 70 is a Grade A." },
-          { type: "fn", stdin: ["65"], fn: (out) => /Grade B/.test(out) && count(out, "Grade") === 1, msg: "A mark of 65 should print only Grade B." },
-          { type: "fn", stdin: ["50"], fn: (out) => /Grade C/.test(out) && count(out, "Grade") === 1, msg: "A mark of 50 should print only Grade C." },
-          { type: "fn", stdin: ["44"], fn: (out) => /Grade D/.test(out) && count(out, "Grade") === 1, msg: "A mark of 44 should print only Grade D." },
-          { type: "fn", stdin: ["12"], fn: (out) => /Grade U/.test(out) && count(out, "Grade") === 1, msg: "A mark of 12 should print only Grade U." },
-          { type: "code", pattern: "else\\s+if", msg: "Use else if to chain your conditions." }
+          { type: "fn", stdin: ["85"], fn: (out) => /Grade A/.test(out) && count(out, "Grade") === 1, msg: "A mark of 85 should print only Grade A.", help: "When the mark entered is <code>85</code>, your program should print only <code>Grade A</code>. If you see more than one grade, join your conditions with <code>else if</code>; if you see the wrong grade, check the highest boundary first." },
+          { type: "fn", stdin: ["70"], fn: (out) => /Grade A/.test(out) && count(out, "Grade") === 1, msg: "A mark of exactly 70 is a Grade A.", help: "When the mark entered is <code>70</code>, your program should print <code>Grade A</code>. Use <code>mark &gt;= 70</code>, not <code>mark &gt; 70</code>." },
+          { type: "fn", stdin: ["65"], fn: (out) => /Grade B/.test(out) && count(out, "Grade") === 1, msg: "A mark of 65 should print only Grade B.", help: "When the mark entered is <code>65</code>, your program should print only <code>Grade B</code>. Check your <code>else if (mark &gt;= 60)</code> line and its spelling." },
+          { type: "fn", stdin: ["50"], fn: (out) => /Grade C/.test(out) && count(out, "Grade") === 1, msg: "A mark of 50 should print only Grade C.", help: "When the mark entered is <code>50</code>, your program should print only <code>Grade C</code>. Make sure the boundary uses <code>&gt;= 50</code>." },
+          { type: "fn", stdin: ["44"], fn: (out) => /Grade D/.test(out) && count(out, "Grade") === 1, msg: "A mark of 44 should print only Grade D.", help: "When the mark entered is <code>44</code>, your program should print only <code>Grade D</code>. Check your <code>else if (mark &gt;= 40)</code> block." },
+          { type: "fn", stdin: ["12"], fn: (out) => /Grade U/.test(out) && count(out, "Grade") === 1, msg: "A mark of 12 should print only Grade U.", help: "When the mark entered is <code>12</code>, your program should print only <code>Grade U</code>. Finish the chain with a plain <code>else</code> that prints it." },
+          { type: "code", pattern: "else\\s+if", msg: "Use else if to chain your conditions.", help: "The checker looks for <code>else if</code> in your code. Chain your conditions together with <code>else if</code> rather than writing separate <code>if</code> statements." }
         ],
-        hint: "Start with if (mark >= 70), then else if (mark >= 60), and so on. The last one is a plain else for Grade U."
+        hint: "Start with if (mark >= 70), then else if (mark >= 60), and so on. The last one is a plain else for Grade U.",
+        goal: "The program asks for a mark out of 100 and prints exactly one grade, from Grade A down to Grade U.",
+        steps: [
+          "Find <code>// TODO: print Grade A, Grade B...</code> under the line that reads the mark.",
+          "Write <code>if (mark &gt;= 70)</code> with curly brackets, and print <code>Grade A</code> inside. Run it with 85 to check.",
+          "Underneath, add <code>else if (mark &gt;= 60)</code> with brackets and print <code>Grade B</code> inside.",
+          "Add two more <code>else if</code> blocks in the same way: <code>&gt;= 50</code> prints <code>Grade C</code> and <code>&gt;= 40</code> prints <code>Grade D</code>.",
+          "Finish with a plain <code>else</code> (no condition) that prints <code>Grade U</code>.",
+          "Press <strong>Run</strong> and try 70, 65, 50, 44 and 12. Each one should print one grade only."
+        ],
+        hints: [
+          "Only one grade should ever print. A chain of <code>if</code> / <code>else if</code> / <code>else</code> stops at the first true condition.",
+          "Start with the <strong>highest</strong> boundary, <code>mark &gt;= 70</code>, and work down: 60, 50, 40. The final <code>else</code> handles everything under 40.",
+          "<code>if (mark &gt;= 70)\n{\n    Console.WriteLine(\"Grade A\");\n}\nelse if (mark &gt;= 60)\n{\n    Console.WriteLine(\"Grade B\");\n}\n// ...C and D the same way...\nelse\n{\n    Console.WriteLine(\"Grade U\");\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Checking the lowest boundary first, e.g. <code>if (mark &gt;= 40)</code> before <code>mark &gt;= 70</code>.", fix: "A mark of 85 is also 40 or more, so it gets Grade D. Put the highest boundary first and work down." },
+          { wrong: "Using separate <code>if</code> statements instead of <code>else if</code>.", fix: "Separate ifs are all checked, so 85 prints Grade A, B, C and D. Join them with <code>else if</code> so only one runs." },
+          { wrong: "Using <code>&gt;</code> instead of <code>&gt;=</code>, so exactly 70 gets Grade B.", fix: "The boundaries say \"70 or more\", which is <code>mark &gt;= 70</code>." },
+          { wrong: "Giving the last <code>else</code> a condition, like <code>else (mark &lt; 40)</code>.", fix: "A plain <code>else</code> never has a condition. Either write just <code>else</code> or use <code>else if (mark &lt; 40)</code>." }
+        ]
       },
 
       // ---------------------------------------------------------------- l3
@@ -242,13 +282,32 @@ if (age < 11 || age > 18)
 }`),
         stdin: ["15", "yes"],
         tests: [
-          { type: "output", stdin: ["15", "yes"], includes: "You can go on the rugby trip!", msg: "Age 15 with a slip should be allowed on the trip." },
-          { type: "output", stdin: ["15", "no"], includes: "Sorry, you can't go this time.", msg: "Age 15 without a slip should not be allowed." },
-          { type: "fn", stdin: ["12", "yes"], fn: (out) => /Sorry, you can't go/.test(out) && !/Age not valid/.test(out), msg: "Age 12 with a slip is too young for the trip (but is a valid age)." },
-          { type: "output", stdin: ["20", "yes"], includes: "Age not valid for this school.", msg: "Age 20 should also print Age not valid for this school." },
-          { type: "code", pattern: "&&[\\s\\S]*\\|\\||\\|\\|[\\s\\S]*&&", msg: "Use both && and ||." }
+          { type: "output", stdin: ["15", "yes"], includes: "You can go on the rugby trip!", msg: "Age 15 with a slip should be allowed on the trip.", help: "When the inputs are <code>15</code> and <code>yes</code>, your program should print <code>You can go on the rugby trip!</code>. Check your condition is <code>age &gt;= 14 &amp;&amp; slip == \"yes\"</code>." },
+          { type: "output", stdin: ["15", "no"], includes: "Sorry, you can't go this time.", msg: "Age 15 without a slip should not be allowed.", help: "When the inputs are <code>15</code> and <code>no</code>, your program should print <code>Sorry, you can't go this time.</code>. Make sure you used <code>&amp;&amp;</code> (not <code>||</code>) and have an <code>else</code> block." },
+          { type: "fn", stdin: ["12", "yes"], fn: (out) => /Sorry, you can't go/.test(out) && !/Age not valid/.test(out), msg: "Age 12 with a slip is too young for the trip (but is a valid age).", help: "When the inputs are <code>12</code> and <code>yes</code>, your program should print the Sorry message and <em>not</em> the age warning. 12 is under 14 but is a valid school age, so check both conditions carefully." },
+          { type: "output", stdin: ["20", "yes"], includes: "Age not valid for this school.", msg: "Age 20 should also print Age not valid for this school.", help: "When the inputs are <code>20</code> and <code>yes</code>, your program should also print <code>Age not valid for this school.</code>. Add a separate <code>if (age &lt; 11 || age &gt; 18)</code>." },
+          { type: "code", pattern: "&&[\\s\\S]*\\|\\||\\|\\|[\\s\\S]*&&", msg: "Use both && and ||.", help: "The checker looks for both <code>&amp;&amp;</code> and <code>||</code> in your code. Use <code>&amp;&amp;</code> for the trip check and <code>||</code> for the age check." }
         ],
-        hint: "if (age >= 14 && slip == \"yes\") { ... } else { ... }  then  if (age < 11 || age > 18) { ... }"
+        hint: "if (age >= 14 && slip == \"yes\") { ... } else { ... }  then  if (age < 11 || age > 18) { ... }",
+        goal: "The program asks for an age and whether you have a permission slip, says whether you can go on the rugby trip, and warns if the age isn't valid for the school.",
+        steps: [
+          "Find <code>// TODO: use &amp;&amp; to check...</code> under the two input lines.",
+          "Write <code>if (age &gt;= 14 &amp;&amp; slip == \"yes\")</code> with curly brackets, and print <code>You can go on the rugby trip!</code> inside.",
+          "Add an <code>else</code> block that prints <code>Sorry, you can't go this time.</code>. Run it with 15 and yes, then 15 and no.",
+          "Under <code>// TODO: use || ...</code>, start a brand new <code>if</code> (not an <code>else if</code>): <code>if (age &lt; 11 || age &gt; 18)</code>.",
+          "Inside its brackets, print <code>Age not valid for this school.</code>. Run with 20 and yes: you should see two messages."
+        ],
+        hints: [
+          "The trip needs <em>both</em> things to be true, so use AND. The age warning needs <em>either</em> thing to be true, so use OR.",
+          "The first check uses <code>&amp;&amp;</code> with an <code>else</code>. The second check is a separate <code>if</code> that uses <code>||</code>, with no <code>else</code>.",
+          "<code>if (age &gt;= 14 &amp;&amp; slip == \"yes\")\n{\n    Console.WriteLine(\"You can go on the rugby trip!\");\n}\nelse\n{\n    Console.WriteLine(\"Sorry, you can't go this time.\");\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Writing <code>slip = \"yes\"</code> with one equals sign.", fix: "One <code>=</code> stores a value. To compare, use two: <code>slip == \"yes\"</code>." },
+          { wrong: "Writing half a condition, like <code>age &lt; 11 || &gt; 18</code>.", fix: "Each side needs the variable: <code>age &lt; 11 || age &gt; 18</code>." },
+          { wrong: "Making the age check an <code>else if</code> attached to the trip check.", fix: "The age warning is a separate question. Start it with a fresh <code>if</code> so it's checked every time." },
+          { wrong: "Using <code>||</code> for the trip, so a 15-year-old with no slip is allowed.", fix: "Both rules must be met, so use <code>&amp;&amp;</code>." }
+        ]
       },
 
       // ---------------------------------------------------------------- l4
@@ -319,12 +378,30 @@ else
 }`),
         stdin: ["yes", "yes"],
         tests: [
-          { type: "output", stdin: ["yes", "yes"], includes: "Stay inside and play board games.", msg: "Raining and windy: Stay inside and play board games." },
-          { type: "output", stdin: ["yes", "no"], includes: "Take an umbrella.", msg: "Raining but not windy: Take an umbrella." },
-          { type: "fn", stdin: ["no"], fn: (out) => /Go to the park!/.test(out) && !/windy/i.test(out), msg: "Not raining: print Go to the park! and don't ask about wind." },
-          { type: "code", pattern: "if[\\s\\S]*\\{[\\s\\S]*if\\s*\\(", msg: "Put one if inside another (a nested if)." }
+          { type: "output", stdin: ["yes", "yes"], includes: "Stay inside and play board games.", msg: "Raining and windy: Stay inside and play board games.", help: "When the answers are <code>yes</code> and <code>yes</code>, your program should print <code>Stay inside and play board games.</code>. Check the nested <code>if (windy == \"yes\")</code> is inside the raining block." },
+          { type: "output", stdin: ["yes", "no"], includes: "Take an umbrella.", msg: "Raining but not windy: Take an umbrella.", help: "When the answers are <code>yes</code> and <code>no</code>, your program should print <code>Take an umbrella.</code>. Make sure your nested if has an <code>else</code> with that message." },
+          { type: "fn", stdin: ["no"], fn: (out) => /Go to the park!/.test(out) && !/windy/i.test(out), msg: "Not raining: print Go to the park! and don't ask about wind.", help: "When the answer is <code>no</code>, your program should print <code>Go to the park!</code> and never ask about wind. Move the windy question inside the raining <code>if</code>." },
+          { type: "code", pattern: "if[\\s\\S]*\\{[\\s\\S]*if\\s*\\(", msg: "Put one if inside another (a nested if).", help: "The checker looks for one <code>if</code> inside another. Put the windy if/else between the curly brackets of the raining <code>if</code>." }
         ],
-        hint: "The windy question and its if/else go inside the curly brackets of if (raining == \"yes\")."
+        hint: "The windy question and its if/else go inside the curly brackets of if (raining == \"yes\").",
+        goal: "The program asks if it's raining; if it is, it asks if it's windy and suggests board games or an umbrella, and if not it says go to the park.",
+        steps: [
+          "Under the first <code>// TODO</code>, write <code>if (raining == \"yes\")</code> with curly brackets.",
+          "Inside those brackets, ask the second question with <code>Console.Write(\"Is it windy? (yes/no) \");</code> and read it into <code>string windy = Console.ReadLine();</code>.",
+          "Still inside the outer brackets, write a nested <code>if (windy == \"yes\")</code> that prints <code>Stay inside and play board games.</code>, with an <code>else</code> that prints <code>Take an umbrella.</code>.",
+          "After the outer <code>}</code>, add <code>else</code> with brackets that prints <code>Go to the park!</code>.",
+          "Press <strong>Run</strong> three times: try yes/yes, yes/no and no. Check the right message appears each time."
+        ],
+        hints: [
+          "The windy question only makes sense when it's raining, so it belongs <em>inside</em> the raining <code>if</code>.",
+          "Put the windy <code>Console.Write</code>, the <code>ReadLine</code> and a second if/else all between the curly brackets of <code>if (raining == \"yes\")</code>.",
+          "<code>if (raining == \"yes\")\n{\n    Console.Write(\"Is it windy? (yes/no) \");\n    string windy = Console.ReadLine();\n    if (windy == \"yes\")\n    {\n        // board games message\n    }\n    else\n    {\n        // umbrella message\n    }\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Asking about wind before the raining <code>if</code>, so it's always asked.", fix: "Move the windy question inside the <code>if (raining == \"yes\")</code> brackets." },
+          { wrong: "Losing track of brackets, so the <code>else</code> for the park attaches to the wrong <code>if</code>.", fix: "Indent each level by four spaces and count: every <code>{</code> needs a matching <code>}</code>." },
+          { wrong: "Typing <code>Yes</code> when testing, then wondering why it doesn't match.", fix: "<code>==</code> is case-sensitive. Type <code>yes</code> in lower case, as the prompt shows." }
+        ]
       },
 
       // ---------------------------------------------------------------- l5
@@ -422,14 +499,34 @@ switch (day)
 }`),
         stdin: ["2", "Monday"],
         tests: [
-          { type: "output", stdin: ["2", "Monday"], includes: "You chose: Pasta bake", msg: "Meal 2 should print You chose: Pasta bake" },
-          { type: "output", stdin: ["2", "Monday"], includes: "School day", msg: "Monday should print School day" },
-          { type: "output", stdin: ["4", "Saturday"], includes: "You chose: Jacket potato", msg: "Meal 4 should print You chose: Jacket potato" },
-          { type: "fn", stdin: ["9", "Sunday"], fn: (out) => /Not on the menu/.test(out) && /Weekend!/.test(out) && !/School day/.test(out), msg: "Meal 9 should print Not on the menu, and Sunday should print Weekend!" },
-          { type: "code", pattern: "switch\\s*\\([\\s\\S]*switch\\s*\\(", msg: "Use two switch statements." },
-          { type: "code", pattern: "default\\s*:", msg: "Include a default case." }
+          { type: "output", stdin: ["2", "Monday"], includes: "You chose: Pasta bake", msg: "Meal 2 should print You chose: Pasta bake", help: "When the inputs are <code>2</code> and <code>Monday</code>, your program should print <code>You chose: Pasta bake</code>. Check <code>case 2:</code> and the exact spelling." },
+          { type: "output", stdin: ["2", "Monday"], includes: "School day", msg: "Monday should print School day", help: "When the inputs are <code>2</code> and <code>Monday</code>, your program should print <code>School day</code>. Add a <code>default:</code> to your day switch that prints it." },
+          { type: "output", stdin: ["4", "Saturday"], includes: "You chose: Jacket potato", msg: "Meal 4 should print You chose: Jacket potato", help: "When the inputs are <code>4</code> and <code>Saturday</code>, your program should print <code>You chose: Jacket potato</code>. Check you have a <code>case 4:</code> with a <code>break;</code>." },
+          { type: "fn", stdin: ["9", "Sunday"], fn: (out) => /Not on the menu/.test(out) && /Weekend!/.test(out) && !/School day/.test(out), msg: "Meal 9 should print Not on the menu, and Sunday should print Weekend!", help: "When the inputs are <code>9</code> and <code>Sunday</code>, your program should print <code>Not on the menu</code> and <code>Weekend!</code> (and not School day). Check your meal <code>default</code> and that Sunday shares the Saturday block." },
+          { type: "code", pattern: "switch\\s*\\([\\s\\S]*switch\\s*\\(", msg: "Use two switch statements.", help: "The checker looks for two <code>switch</code> statements. Use one for the meal and another for the day." },
+          { type: "code", pattern: "default\\s*:", msg: "Include a default case.", help: "The checker looks for a <code>default:</code> case. Add one to handle values that don't match any case." }
         ],
-        hint: "For the day switch, put case \"Saturday\": and case \"Sunday\": on two lines straight after each other, then the WriteLine and break."
+        hint: "For the day switch, put case \"Saturday\": and case \"Sunday\": on two lines straight after each other, then the WriteLine and break.",
+        goal: "The program asks for a meal number and a day, then says which meal you chose and whether it's the weekend or a school day.",
+        steps: [
+          "Under <code>// TODO: switch (meal)</code>, type <code>switch (meal)</code> with a pair of curly brackets.",
+          "Inside, write <code>case 1:</code>, then on the next lines <code>Console.WriteLine(\"You chose: Pizza\");</code> and <code>break;</code>.",
+          "Copy that pattern for <code>case 2</code>, <code>case 3</code> and <code>case 4</code> with the right meals. Run it and try 2.",
+          "Add <code>default:</code> that prints <code>Not on the menu</code>, followed by <code>break;</code>.",
+          "Under the second TODO, write <code>switch (day)</code>. Put <code>case \"Saturday\":</code> and <code>case \"Sunday\":</code> on two lines one after the other, then print <code>Weekend!</code> and <code>break;</code>.",
+          "Add a <code>default:</code> that prints <code>School day</code> and <code>break;</code>. Run with 9 and Sunday, then 2 and Monday."
+        ],
+        hints: [
+          "You're checking one variable against a list of exact values. That's what <code>switch</code> is made for.",
+          "Each <code>case</code> ends with <code>break;</code>. For the days, stack two case labels so they share one block. Strings in cases need double quotes.",
+          "<code>switch (day)\n{\n    case \"Saturday\":\n    case \"Sunday\":\n        Console.WriteLine(\"Weekend!\");\n        break;\n    default:\n        Console.WriteLine(\"School day\");\n        break;\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Forgetting <code>break;</code> at the end of a case.", fix: "C# gives an error like <em>Control cannot fall through</em>. Add <code>break;</code> as the last line of every case, including <code>default</code>." },
+          { wrong: "Writing <code>case Saturday:</code> without quotes.", fix: "<code>day</code> is a string, so the case value needs quotes: <code>case \"Saturday\":</code>." },
+          { wrong: "Testing with <code>saturday</code> in lower case.", fix: "String cases are case-sensitive. Type <code>Saturday</code> with a capital S." },
+          { wrong: "Putting a <code>break;</code> between the two stacked day cases.", fix: "Leave nothing between <code>case \"Saturday\":</code> and <code>case \"Sunday\":</code> so they share the same block." }
+        ]
       },
 
       // ---------------------------------------------------------------- l6
@@ -483,13 +580,30 @@ string word = n == 1 ? "item" : "items";
 Console.WriteLine($"You have {n} {word}");`),
         stdin: ["7"],
         tests: [
-          { type: "output", stdin: ["7"], includes: "7 is odd", msg: "For 7 print 7 is odd" },
-          { type: "output", stdin: ["4"], includes: "4 is even", msg: "For 4 print 4 is even" },
-          { type: "output", stdin: ["7"], includes: "You have 7 items", msg: "For 7 print You have 7 items" },
-          { type: "outputRegex", stdin: ["1"], pattern: "You have 1 item(?!s)", msg: "For 1 print You have 1 item (no s)." },
-          { type: "code", pattern: "\\?[^;]*:", msg: "Use the ternary operator ( ? : )." }
+          { type: "output", stdin: ["7"], includes: "7 is odd", msg: "For 7 print 7 is odd", help: "When the number entered is <code>7</code>, your program should print <code>7 is odd</code>. Check your ternary gives <code>\"odd\"</code> when <code>n % 2</code> isn't 0." },
+          { type: "output", stdin: ["4"], includes: "4 is even", msg: "For 4 print 4 is even", help: "When the number entered is <code>4</code>, your program should print <code>4 is even</code>. Make sure <code>\"even\"</code> comes straight after the <code>?</code>." },
+          { type: "output", stdin: ["7"], includes: "You have 7 items", msg: "For 7 print You have 7 items", help: "When the number entered is <code>7</code>, your program should print <code>You have 7 items</code>. Check the spaces and spelling in your interpolated string." },
+          { type: "outputRegex", stdin: ["1"], pattern: "You have 1 item(?!s)", msg: "For 1 print You have 1 item (no s).", help: "When the number entered is <code>1</code>, your program should print <code>You have 1 item</code> with no s. Use <code>n == 1 ? \"item\" : \"items\"</code>." },
+          { type: "code", pattern: "\\?[^;]*:", msg: "Use the ternary operator ( ? : ).", help: "The checker looks for the ternary operator <code>? :</code> in your code. Use it instead of an if/else to pick the words." }
         ],
-        hint: "string type = n % 2 == 0 ? \"even\" : \"odd\";  then  Console.WriteLine($\"{n} is {type}\");"
+        hint: "string type = n % 2 == 0 ? \"even\" : \"odd\";  then  Console.WriteLine($\"{n} is {type}\");",
+        goal: "The program asks for a number, says whether it is odd or even, and says how many items you have with the right singular or plural word.",
+        steps: [
+          "Under the first TODO, type <code>string type = n % 2 == 0 ? \"even\" : \"odd\";</code>.",
+          "Print it with <code>Console.WriteLine($\"{n} is {type}\");</code>. Press <strong>Run</strong> and try 7: you should see <code>7 is odd</code>.",
+          "Under the next TODO, write <code>string word = </code> followed by a ternary that checks <code>n == 1</code> and chooses <code>\"item\"</code> or <code>\"items\"</code>.",
+          "Print <code>You have</code>, the number and the word with an interpolated string. Run with 7 and then with 1."
+        ],
+        hints: [
+          "The ternary operator picks one of two values: <code>condition ? valueIfTrue : valueIfFalse</code>.",
+          "For even or odd, the condition is <code>n % 2 == 0</code>. For the plural, the condition is <code>n == 1</code>.",
+          "<code>string word = n == 1 ? \"item\" : \"items\";\nConsole.WriteLine($\"You have {n} {word}\");</code>"
+        ],
+        mistakes: [
+          { wrong: "Swapping the two values: <code>n % 2 == 0 ? \"odd\" : \"even\"</code>.", fix: "The value straight after <code>?</code> is used when the condition is true. An even number has remainder 0, so <code>\"even\"</code> goes first." },
+          { wrong: "Forgetting the <code>$</code> before the string, so it prints <code>{n} is {type}</code> literally.", fix: "Interpolated strings must start with <code>$\"</code>." },
+          { wrong: "Using <code>n == 1 ? \"items\" : \"item\"</code>, which gives \"1 items\".", fix: "When n is 1 you want the singular <code>\"item\"</code>, so put it first." }
+        ]
       },
 
       // ---------------------------------------------------------------- l7
@@ -552,12 +666,31 @@ else
 }`),
         stdin: ["coach", "Scrum2026"],
         tests: [
-          { type: "output", stdin: ["coach", "Scrum2026"], includes: "Access granted. Welcome, coach!", msg: "coach / Scrum2026 should be granted access." },
-          { type: "fn", stdin: ["coach", "password"], fn: (out) => /Access denied\./.test(out) && !/granted/i.test(out), msg: "A wrong password should print Access denied." },
-          { type: "fn", stdin: ["Coach", "Scrum2026"], fn: (out) => /Access denied\./.test(out) && !/granted/i.test(out), msg: "Usernames are case-sensitive: Coach should be denied." },
-          { type: "code", pattern: "const\\s+string", msg: "Store the username and password in const variables." }
+          { type: "output", stdin: ["coach", "Scrum2026"], includes: "Access granted. Welcome, coach!", msg: "coach / Scrum2026 should be granted access.", help: "When the inputs are <code>coach</code> and <code>Scrum2026</code>, your program should print <code>Access granted. Welcome, coach!</code>. Check the spelling of your constants and the message." },
+          { type: "fn", stdin: ["coach", "password"], fn: (out) => /Access denied\./.test(out) && !/granted/i.test(out), msg: "A wrong password should print Access denied.", help: "When the inputs are <code>coach</code> and <code>password</code>, your program should print <code>Access denied.</code> and nothing about granted. Use <code>&amp;&amp;</code> so both details must match." },
+          { type: "fn", stdin: ["Coach", "Scrum2026"], fn: (out) => /Access denied\./.test(out) && !/granted/i.test(out), msg: "Usernames are case-sensitive: Coach should be denied.", help: "When the inputs are <code>Coach</code> and <code>Scrum2026</code>, access should be denied because of the capital C. Don't use <code>ToLower()</code>; compare the input exactly." },
+          { type: "code", pattern: "const\\s+string", msg: "Store the username and password in const variables.", help: "The checker looks for <code>const string</code> in your code. Declare <code>Username</code> and <code>Password</code> as constants at the top." }
         ],
-        hint: "const string Username = \"coach\";  and then  if (user == Username && pass == Password)"
+        hint: "const string Username = \"coach\";  and then  if (user == Username && pass == Password)",
+        goal: "The program asks for a username and password and only grants access when both exactly match the stored constants.",
+        steps: [
+          "At the very top, under the first TODO, type <code>const string Username = \"coach\";</code>.",
+          "On the next line, type <code>const string Password = \"Scrum2026\";</code>. Press <strong>Run</strong> to check there are no errors.",
+          "Under <code>// TODO: check BOTH match</code>, write <code>if (user == Username &amp;&amp; pass == Password)</code> with curly brackets.",
+          "Inside, print <code>Access granted. Welcome, coach!</code>.",
+          "Add an <code>else</code> that prints <code>Access denied.</code>. Run it with coach and Scrum2026, then try a wrong password."
+        ],
+        hints: [
+          "Store the correct details as constants with <code>const</code>, then compare what the user typed against them.",
+          "Both details have to match, so join the two comparisons with <code>&amp;&amp;</code> inside one <code>if</code>.",
+          "<code>const string Username = \"coach\";\nconst string Password = \"Scrum2026\";\n// ...after reading user and pass...\nif (user == Username &amp;&amp; pass == Password)</code>"
+        ],
+        mistakes: [
+          { wrong: "Comparing against the text directly, like <code>user == \"coach\"</code>, and never using the constants.", fix: "The checker wants <code>const string</code> variables. Compare with <code>Username</code> and <code>Password</code>." },
+          { wrong: "Using <code>||</code>, so a right username with the wrong password is let in.", fix: "Both must match, so use <code>&amp;&amp;</code>." },
+          { wrong: "Using <code>ToLower()</code> on the input so <code>Coach</code> is accepted.", fix: "Logins should be case-sensitive here. Compare the input exactly as typed." },
+          { wrong: "Typing the password slightly wrong in the constant, e.g. <code>scrum2026</code>.", fix: "Copy it exactly: capital S, then <code>crum2026</code>." }
+        ]
       },
 
       // ---------------------------------------------------------------- l8
@@ -640,13 +773,33 @@ else
 Console.WriteLine($"Your ticket costs £{price:F2}");`),
         stdin: ["30", "Monday"],
         tests: [
-          { type: "output", stdin: ["10", "Friday"], includes: "Your ticket costs £5.00", msg: "A 10-year-old on Friday pays £5.00" },
-          { type: "output", stdin: ["17", "Saturday"], includes: "Your ticket costs £6.50", msg: "A 17-year-old on Saturday pays £6.50" },
-          { type: "output", stdin: ["30", "Monday"], includes: "Your ticket costs £9.00", msg: "A 30-year-old on Monday pays £9.00" },
-          { type: "output", stdin: ["70", "Sunday"], includes: "Your ticket costs £5.50", msg: "A 70-year-old on Sunday pays £5.50 (check your order!)" },
-          { type: "output", stdin: ["30", "Tuesday"], includes: "Your ticket costs £4.00", msg: "Everyone pays £4.00 on a Tuesday." }
+          { type: "output", stdin: ["10", "Friday"], includes: "Your ticket costs £5.00", msg: "A 10-year-old on Friday pays £5.00", help: "When the inputs are <code>10</code> and <code>Friday</code>, your program should print <code>Your ticket costs £5.00</code>. Check your <code>age &lt; 12</code> band, and that you removed <code>price = 0;</code>." },
+          { type: "output", stdin: ["17", "Saturday"], includes: "Your ticket costs £6.50", msg: "A 17-year-old on Saturday pays £6.50", help: "When the inputs are <code>17</code> and <code>Saturday</code>, your program should print <code>Your ticket costs £6.50</code>. 17 is included in the teen band, so use <code>age &lt;= 17</code>." },
+          { type: "output", stdin: ["30", "Monday"], includes: "Your ticket costs £9.00", msg: "A 30-year-old on Monday pays £9.00", help: "When the inputs are <code>30</code> and <code>Monday</code>, your program should print <code>Your ticket costs £9.00</code>. Make sure the final <code>else</code> sets the adult price." },
+          { type: "output", stdin: ["70", "Sunday"], includes: "Your ticket costs £5.50", msg: "A 70-year-old on Sunday pays £5.50 (check your order!)", help: "When the inputs are <code>70</code> and <code>Sunday</code>, your program should print <code>Your ticket costs £5.50</code>. Check the 65-or-over test comes before any adult check." },
+          { type: "output", stdin: ["30", "Tuesday"], includes: "Your ticket costs £4.00", msg: "Everyone pays £4.00 on a Tuesday.", help: "When the inputs are <code>30</code> and <code>Tuesday</code>, your program should print <code>Your ticket costs £4.00</code>. Check Tuesday first, spelled with a capital T." }
         ],
-        hint: "Check Tuesday first, then age < 12, then age <= 17, then age >= 65, and finally else for adults."
+        hint: "Check Tuesday first, then age < 12, then age <= 17, then age >= 65, and finally else for adults.",
+        goal: "The program asks for your age and the day, works out the cinema ticket price from the pricing rules, and prints it with two decimal places.",
+        steps: [
+          "Find the TODO about Tuesday. Write <code>if (day == \"Tuesday\")</code> with brackets, and set <code>price = 4.00;</code> inside.",
+          "Add <code>else if (age &lt; 12)</code> that sets <code>price = 5.00;</code>.",
+          "Add <code>else if (age &lt;= 17)</code> that sets <code>price = 6.50;</code>.",
+          "Add <code>else if (age &gt;= 65)</code> that sets <code>price = 5.50;</code>, then a plain <code>else</code> that sets <code>price = 9.00;</code>.",
+          "Delete the line <code>price = 0; // TODO: remove this line...</code>, or the price will always be £0.00.",
+          "Press <strong>Run</strong> and test: 10 Friday, 17 Saturday, 30 Monday, 70 Sunday and 30 Tuesday."
+        ],
+        hints: [
+          "Tuesday beats every age rule, so check it first. Then work through the age bands in a sensible order.",
+          "Use one chain: <code>if</code> for Tuesday, then <code>else if</code> for under 12, 17 or under, and 65 or over, with a final <code>else</code> for adults. Each block just sets <code>price</code>.",
+          "<code>if (day == \"Tuesday\")\n{\n    price = 4.00;\n}\nelse if (age &lt; 12)\n{\n    price = 5.00;\n}\nelse if (age &lt;= 17)\n{\n    price = 6.50;\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Leaving the line <code>price = 0;</code> in the program after your if statements.", fix: "That line overwrites the price you worked out. Delete it." },
+          { wrong: "Checking <code>age &gt;= 18</code> for adults before <code>age &gt;= 65</code>.", fix: "A 70-year-old is also 18 or over, so they'd pay £9.00. Check 65 or over before the adult price, or use a final <code>else</code> for adults." },
+          { wrong: "Using <code>age &lt; 17</code> for the teen band, so a 17-year-old pays the adult price.", fix: "17 is included, so use <code>age &lt;= 17</code>." },
+          { wrong: "Checking Tuesday last, so children still pay £5.00 on a Tuesday.", fix: "Put the Tuesday check at the very start of the chain." }
+        ]
       },
 
       // ---------------------------------------------------------------- quiz

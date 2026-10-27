@@ -87,12 +87,31 @@ static void ShowLogo()
     Console.WriteLine("+--------+");
 }` }),
         tests: [
-          { type: "fn", fn: (out) => count(out, "| PIZZA! |") === 2 && count(out, "+--------+") === 4, msg: "The logo (3 lines) should be printed twice." },
-          { type: "outputRegex", pattern: "PIZZA! \\|\\s*\\n\\+-+\\+\\s*\\nToday's special: Margherita\\s*\\n\\+", msg: "The special should be printed between the two logos." },
-          { type: "code", pattern: "static\\s+void\\s+ShowLogo\\s*\\(\\s*\\)", msg: "Define static void ShowLogo()." },
-          { type: "fn", fn: (out, code) => count(code, "| PIZZA! |") === 1, msg: "Only write the logo lines once, inside the method, and call it twice." }
+          { type: "fn", fn: (out) => count(out, "| PIZZA! |") === 2 && count(out, "+--------+") === 4, msg: "The logo (3 lines) should be printed twice.", help: "The checker wants the 3-line logo printed twice. Call <code>ShowLogo();</code> two times in <code>Main</code>, and check the logo lines are typed exactly." },
+          { type: "outputRegex", pattern: "PIZZA! \\|\\s*\\n\\+-+\\+\\s*\\nToday's special: Margherita\\s*\\n\\+", msg: "The special should be printed between the two logos.", help: "The special should be printed between the two logos. Put one <code>ShowLogo();</code> before the special line and one after it." },
+          { type: "code", pattern: "static\\s+void\\s+ShowLogo\\s*\\(\\s*\\)", msg: "Define static void ShowLogo().", help: "The checker looks for <code>static void ShowLogo()</code> in your code. Check the spelling, capitals and the word <code>static</code>." },
+          { type: "fn", fn: (out, code) => count(code, "| PIZZA! |") === 1, msg: "Only write the logo lines once, inside the method, and call it twice.", help: "The checker wants the <code>| PIZZA! |</code> line to appear only once in your code. Write the logo inside the method and call it, rather than copying the lines." }
         ],
-        hint: "Put static void ShowLogo() { ... } after the closing } of Main but before the final } of class Program."
+        hint: "Put static void ShowLogo() { ... } after the closing } of Main but before the final } of class Program.",
+        goal: "The program prints a pizza logo, then today's special, then the logo again, using one method that is called twice.",
+        steps: [
+          "Find <code>// TODO: write static void ShowLogo() here</code> near the bottom, below <code>Main</code>'s closing bracket.",
+          "Type the method header <code>static void ShowLogo()</code> with a pair of curly brackets under it.",
+          "Inside those brackets, add three <code>Console.WriteLine</code> lines: <code>+--------+</code>, <code>| PIZZA! |</code> and <code>+--------+</code>.",
+          "Back in <code>Main</code>, replace the first TODO with the call <code>ShowLogo();</code>. Press <strong>Run</strong>: the logo should appear above the special.",
+          "Replace the second TODO in <code>Main</code> with another <code>ShowLogo();</code>. Run again to see the logo twice."
+        ],
+        hints: [
+          "Write the logo once inside a method, then call that method whenever you want the logo.",
+          "The method goes inside <code>class Program</code> but outside <code>Main</code>. Call it by writing its name with brackets and a semicolon.",
+          "<code>static void ShowLogo()\n{\n    Console.WriteLine(\"+--------+\");\n    Console.WriteLine(\"| PIZZA! |\");\n    Console.WriteLine(\"+--------+\");\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Putting the method inside <code>Main</code>'s curly brackets.", fix: "Methods sit side by side inside <code>class Program</code>. Put it after <code>Main</code>'s closing <code>}</code>." },
+          { wrong: "Missing <code>static</code>: <code>void ShowLogo()</code>.", fix: "<code>Main</code> is static, so methods it calls need <code>static</code> too." },
+          { wrong: "Writing <code>ShowLogo;</code> without brackets.", fix: "A call needs brackets: <code>ShowLogo();</code>." },
+          { wrong: "Copying the three logo lines into <code>Main</code> as well.", fix: "Only write them once, inside the method. Main should just call <code>ShowLogo()</code>." }
+        ]
       },
 
       // ---------------------------------------------------------------- l2
@@ -153,13 +172,33 @@ static void Scoreline(string home, int homeScore, string away, int awayScore)
     Console.WriteLine($"{home} {homeScore} - {awayScore} {away}");
 }` }),
         tests: [
-          { type: "outputRegex", pattern: "(^|\\n)={20}\\s*\\n", msg: "DrawLine('=', 20) should print exactly 20 = signs on a line." },
-          { type: "outputRegex", pattern: "(^|\\n)-{10}\\s*(\\n|$)", msg: "DrawLine('-', 10) should print exactly 10 - signs on a line." },
-          { type: "fn", fn: (out) => out.includes("Lions 24 - 17 Tigers") && out.includes("Eagles 12 - 30 Hawks"), msg: "Print Lions 24 - 17 Tigers and Eagles 12 - 30 Hawks" },
-          { type: "code", pattern: "static\\s+void\\s+DrawLine\\s*\\(\\s*char\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*\\)", msg: "Define static void DrawLine(char symbol, int length)." },
-          { type: "code", pattern: "static\\s+void\\s+Scoreline\\s*\\(\\s*string\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*,\\s*string\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*\\)", msg: "Define Scoreline with four parameters: string, int, string, int." }
+          { type: "outputRegex", pattern: "(^|\\n)={20}\\s*\\n", msg: "DrawLine('=', 20) should print exactly 20 = signs on a line.", help: "The checker wants a line of exactly 20 <code>=</code> signs. Check your loop uses <code>i &lt; length</code> and you call <code>DrawLine('=', 20)</code>." },
+          { type: "outputRegex", pattern: "(^|\\n)-{10}\\s*(\\n|$)", msg: "DrawLine('-', 10) should print exactly 10 - signs on a line.", help: "The checker wants a line of exactly 10 <code>-</code> signs. Call <code>DrawLine('-', 10)</code> at the end of Main." },
+          { type: "fn", fn: (out) => out.includes("Lions 24 - 17 Tigers") && out.includes("Eagles 12 - 30 Hawks"), msg: "Print Lions 24 - 17 Tigers and Eagles 12 - 30 Hawks", help: "The checker wants <code>Lions 24 - 17 Tigers</code> and <code>Eagles 12 - 30 Hawks</code>. Check the order inside your Scoreline message." },
+          { type: "code", pattern: "static\\s+void\\s+DrawLine\\s*\\(\\s*char\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*\\)", msg: "Define static void DrawLine(char symbol, int length).", help: "The checker looks for <code>static void DrawLine(char ..., int ...)</code>. Check the parameter types and their order." },
+          { type: "code", pattern: "static\\s+void\\s+Scoreline\\s*\\(\\s*string\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*,\\s*string\\s+\\w+\\s*,\\s*int\\s+\\w+\\s*\\)", msg: "Define Scoreline with four parameters: string, int, string, int.", help: "The checker looks for Scoreline with four parameters: <code>string</code>, <code>int</code>, <code>string</code>, <code>int</code>. Check each one has a type and a name, separated by commas." }
         ],
-        hint: "Inside DrawLine: for (int i = 0; i < length; i++) { Console.Write(symbol); } then Console.WriteLine();"
+        hint: "Inside DrawLine: for (int i = 0; i < length; i++) { Console.Write(symbol); } then Console.WriteLine();",
+        goal: "The program draws lines of symbols and prints two match scorelines, using methods that take parameters.",
+        steps: [
+          "Under <code>// TODO: static void DrawLine</code>, write <code>static void DrawLine(char symbol, int length)</code> with curly brackets.",
+          "Inside, write a loop <code>for (int i = 0; i &lt; length; i++)</code> that does <code>Console.Write(symbol);</code>, then after the loop add <code>Console.WriteLine();</code>.",
+          "In <code>Main</code>, call <code>DrawLine('=', 20);</code> and <code>DrawLine('-', 10);</code> in the right places. Press <strong>Run</strong> to see two lines.",
+          "Under the Scoreline TODO, write <code>static void Scoreline(string home, int homeScore, string away, int awayScore)</code> with curly brackets.",
+          "Inside, print <code>$\"{home} {homeScore} - {awayScore} {away}\"</code>.",
+          "In <code>Main</code>, between the two lines, call <code>Scoreline(\"Lions\", 24, \"Tigers\", 17);</code> and <code>Scoreline(\"Eagles\", 12, \"Hawks\", 30);</code>. Run it."
+        ],
+        hints: [
+          "Parameters let you hand values into a method. The method then uses them like normal variables.",
+          "<code>DrawLine</code> needs a loop that runs <code>length</code> times. <code>Scoreline</code> just prints one line using its four parameters. Note the away score comes before the away team name.",
+          "<code>static void DrawLine(char symbol, int length)\n{\n    for (int i = 0; i &lt; length; i++)\n    {\n        Console.Write(symbol);\n    }\n    Console.WriteLine();\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Using <code>Console.WriteLine(symbol)</code> in the loop, so each symbol is on its own line.", fix: "Use <code>Console.Write</code> inside the loop and one <code>Console.WriteLine()</code> after it." },
+          { wrong: "Passing arguments in the wrong order, like <code>DrawLine(20, '=')</code>.", fix: "Arguments must match the parameter order: the char first, then the int." },
+          { wrong: "Using double quotes for the symbol: <code>DrawLine(\"=\", 20)</code>.", fix: "A <code>char</code> uses single quotes: <code>'='</code>." },
+          { wrong: "Printing <code>{home} {homeScore} - {away} {awayScore}</code>.", fix: "The format is <code>Lions 24 - 17 Tigers</code>: the away score comes before the away team." }
+        ]
       },
 
       // ---------------------------------------------------------------- l3
@@ -227,14 +266,33 @@ static int RugbyPoints(int tries, int conversions, int penalties)
 }` }),
         stdin: ["20"],
         tests: [
-          { type: "output", stdin: ["20"], includes: "That's 68 F", msg: "20 C should print That's 68 F" },
-          { type: "output", stdin: ["-10"], includes: "That's 14 F", msg: "-10 C should print That's 14 F" },
-          { type: "output", stdin: ["37.5"], includes: "That's 99.5 F", msg: "37.5 C should print That's 99.5 F" },
-          { type: "output", stdin: ["20"], includes: "Lions scored 29 points", msg: "RugbyPoints(4, 3, 1) is 20 + 6 + 3: print Lions scored 29 points" },
-          { type: "code", pattern: "static\\s+double\\s+CelsiusToFahrenheit\\s*\\([\\s\\S]*return", msg: "CelsiusToFahrenheit should be a double function with a return statement." },
-          { type: "code", pattern: "static\\s+int\\s+RugbyPoints\\s*\\(", msg: "Define static int RugbyPoints(...)." }
+          { type: "output", stdin: ["20"], includes: "That's 68 F", msg: "20 C should print That's 68 F", help: "When <code>20</code> is entered, your program should print <code>That's 68 F</code>. Check the formula <code>c * 9 / 5 + 32</code> and that you print the value returned." },
+          { type: "output", stdin: ["-10"], includes: "That's 14 F", msg: "-10 C should print That's 14 F", help: "When <code>-10</code> is entered, your program should print <code>That's 14 F</code>. Make sure you pass <code>c</code> into the function, not a fixed number." },
+          { type: "output", stdin: ["37.5"], includes: "That's 99.5 F", msg: "37.5 C should print That's 99.5 F", help: "When <code>37.5</code> is entered, your program should print <code>That's 99.5 F</code>. Use <code>double</code> for the parameter and return type so decimals aren't lost." },
+          { type: "output", stdin: ["20"], includes: "Lions scored 29 points", msg: "RugbyPoints(4, 3, 1) is 20 + 6 + 3: print Lions scored 29 points", help: "The checker wants <code>Lions scored 29 points</code>. Check <code>RugbyPoints</code> returns tries × 5 + conversions × 2 + penalties × 3 and you call it with <code>(4, 3, 1)</code>." },
+          { type: "code", pattern: "static\\s+double\\s+CelsiusToFahrenheit\\s*\\([\\s\\S]*return", msg: "CelsiusToFahrenheit should be a double function with a return statement.", help: "The checker looks for <code>static double CelsiusToFahrenheit(</code> with a <code>return</code>. Write it as a function that returns the answer." },
+          { type: "code", pattern: "static\\s+int\\s+RugbyPoints\\s*\\(", msg: "Define static int RugbyPoints(...).", help: "The checker looks for <code>static int RugbyPoints(</code>. Check the spelling and that it returns an <code>int</code>." }
         ],
-        hint: "static double CelsiusToFahrenheit(double c) { return c * 9 / 5 + 32; }"
+        hint: "static double CelsiusToFahrenheit(double c) { return c * 9 / 5 + 32; }",
+        goal: "The program converts a Celsius temperature you type into Fahrenheit and works out the Lions' rugby score, using functions that return values.",
+        steps: [
+          "Under <code>// TODO: static double CelsiusToFahrenheit</code>, write <code>static double CelsiusToFahrenheit(double c)</code> with curly brackets.",
+          "Inside, write <code>return c * 9 / 5 + 32;</code>.",
+          "In <code>Main</code>, store the answer: <code>double f = CelsiusToFahrenheit(c);</code> and print <code>$\"That's {f} F\"</code>. Press <strong>Run</strong> and type 20.",
+          "Under the RugbyPoints TODO, write <code>static int RugbyPoints(int tries, int conversions, int penalties)</code> that returns <code>tries * 5 + conversions * 2 + penalties * 3</code>.",
+          "In <code>Main</code>, print <code>$\"Lions scored {RugbyPoints(4, 3, 1)} points\"</code>. Run again."
+        ],
+        hints: [
+          "A function works something out and hands the answer back with <code>return</code>. Main then uses that answer.",
+          "Put the return type (<code>double</code> or <code>int</code>) before the method name instead of <code>void</code>. In Main, store or print the result of the call.",
+          "<code>static int RugbyPoints(int tries, int conversions, int penalties)\n{\n    return tries * 5 + conversions * 2 + penalties * 3;\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Calling <code>CelsiusToFahrenheit(c);</code> on its own line and ignoring the answer.", fix: "The returned value is thrown away. Store it (<code>double f = ...</code>) or use it inside the print." },
+          { wrong: "Using <code>void</code> as the return type.", fix: "A function that returns a value needs that type: <code>static double</code> or <code>static int</code>." },
+          { wrong: "Printing inside the function instead of returning.", fix: "Use <code>return</code> to send the answer back, and print it in Main." },
+          { wrong: "Missing <code>static</code> on the methods.", fix: "Methods called from Main need <code>static</code>." }
+        ]
       },
 
       // ---------------------------------------------------------------- l4
@@ -321,14 +379,33 @@ static bool IsPass(int mark)
 }` }),
         stdin: ["55"],
         tests: [
-          { type: "fn", stdin: ["55"], fn: (out) => /\bPass\b/.test(out) && !/Invalid/.test(out), msg: "55 is valid and should print Pass" },
-          { type: "fn", stdin: ["39"], fn: (out) => /\bFail\b/.test(out), msg: "39 should print Fail" },
-          { type: "fn", stdin: ["40"], fn: (out) => /\bPass\b/.test(out), msg: "40 is exactly the pass mark, so it should print Pass" },
-          { type: "fn", stdin: ["150", "-5", "100"], fn: (out) => count(out, "Invalid mark") === 2 && /\bPass\b/.test(out), msg: "150 and -5 should each print Invalid mark; then 100 should print Pass" },
-          { type: "code", pattern: "static\\s+bool\\s+IsValidMark\\s*\\(\\s*int", msg: "Define static bool IsValidMark(int mark)." },
-          { type: "code", pattern: "static\\s+bool\\s+IsPass\\s*\\(\\s*int", msg: "Define static bool IsPass(int mark)." }
+          { type: "fn", stdin: ["55"], fn: (out) => /\bPass\b/.test(out) && !/Invalid/.test(out), msg: "55 is valid and should print Pass", help: "When <code>55</code> is entered, your program should print <code>Pass</code> with no Invalid mark. Check <code>IsValidMark</code> returns true for 0 to 100 and the while uses <code>!</code>." },
+          { type: "fn", stdin: ["39"], fn: (out) => /\bFail\b/.test(out), msg: "39 should print Fail", help: "When <code>39</code> is entered, your program should print <code>Fail</code>. Check <code>IsPass</code> returns <code>mark &gt;= 40</code> and you have an <code>else</code>." },
+          { type: "fn", stdin: ["40"], fn: (out) => /\bPass\b/.test(out), msg: "40 is exactly the pass mark, so it should print Pass", help: "When <code>40</code> is entered, your program should print <code>Pass</code>. Use <code>&gt;=</code>, not <code>&gt;</code>." },
+          { type: "fn", stdin: ["150", "-5", "100"], fn: (out) => count(out, "Invalid mark") === 2 && /\bPass\b/.test(out), msg: "150 and -5 should each print Invalid mark; then 100 should print Pass", help: "When the inputs are <code>150</code>, <code>-5</code>, <code>100</code>, it should print <code>Invalid mark</code> twice then <code>Pass</code>. Use <code>&amp;&amp;</code> in IsValidMark and read a new mark inside the loop." },
+          { type: "code", pattern: "static\\s+bool\\s+IsValidMark\\s*\\(\\s*int", msg: "Define static bool IsValidMark(int mark).", help: "The checker looks for <code>static bool IsValidMark(int ...)</code>. Check the spelling and the <code>bool</code> return type." },
+          { type: "code", pattern: "static\\s+bool\\s+IsPass\\s*\\(\\s*int", msg: "Define static bool IsPass(int mark).", help: "The checker looks for <code>static bool IsPass(int ...)</code>. Check the spelling and the <code>bool</code> return type." }
         ],
-        hint: "static bool IsPass(int mark) { return mark >= 40; }"
+        hint: "static bool IsPass(int mark) { return mark >= 40; }",
+        goal: "The program asks for a mark, keeps asking until it's between 0 and 100, then says Pass or Fail, using two true/false functions.",
+        steps: [
+          "Under <code>// TODO: static bool IsValidMark</code>, write <code>static bool IsValidMark(int mark)</code> with <code>return mark &gt;= 0 &amp;&amp; mark &lt;= 100;</code> inside.",
+          "Under the next TODO, write <code>static bool IsPass(int mark)</code> with <code>return mark &gt;= 40;</code> inside.",
+          "In <code>Main</code>, write <code>while (!IsValidMark(mark))</code> with curly brackets.",
+          "Inside the loop, print <code>Invalid mark</code>, ask <code>Enter mark: </code> again and read a new <code>mark</code>. Press <strong>Run</strong> and try 150.",
+          "After the loop, write <code>if (IsPass(mark))</code> that prints <code>Pass</code>, with an <code>else</code> that prints <code>Fail</code>. Run with 55, 39 and 40."
+        ],
+        hints: [
+          "A <code>bool</code> function answers a yes/no question with <code>true</code> or <code>false</code>. You can use it straight inside an <code>if</code> or <code>while</code>.",
+          "You can return a comparison directly, like <code>return mark &gt;= 40;</code>. The <code>!</code> in <code>while (!IsValidMark(mark))</code> means \"while it is not valid\".",
+          "<code>while (!IsValidMark(mark))\n{\n    Console.WriteLine(\"Invalid mark\");\n    Console.Write(\"Enter mark: \");\n    mark = Convert.ToInt32(Console.ReadLine());\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Using <code>||</code> in IsValidMark: <code>mark &gt;= 0 || mark &lt;= 100</code>.", fix: "Every number passes that. A valid mark must be both, so use <code>&amp;&amp;</code>." },
+          { wrong: "Using <code>mark &gt; 40</code>, so exactly 40 fails.", fix: "40 is a pass, so use <code>mark &gt;= 40</code>." },
+          { wrong: "Only returning inside an <code>if</code>, giving <em>not all code paths return a value</em>.", fix: "Every path must return something. Returning the comparison directly avoids this." },
+          { wrong: "Forgetting the <code>!</code> in the while loop.", fix: "You want to loop while the mark is <em>not</em> valid: <code>while (!IsValidMark(mark))</code>." }
+        ]
       },
 
       // ---------------------------------------------------------------- l5
@@ -415,13 +492,32 @@ class Program
 }
 `,
         tests: [
-          { type: "fn", fn: (out) => out.includes("+5 points") && out.includes("+10 points") && out.includes("+3 points"), msg: "Print +5 points, +10 points and +3 points" },
-          { type: "outputRegex", pattern: "Score: 15[\\s\\S]*Score: 18", msg: "Print Score: 15 and then Score: 18" },
-          { type: "code", pattern: "static\\s+int\\s+score", msg: "Declare score as a global: static int score = 0; at class level." },
-          { type: "code", pattern: "static\\s+void\\s+AddPoints\\s*\\(\\s*int", msg: "Define static void AddPoints(int points)." },
-          { type: "code", pattern: "static\\s+void\\s+ShowScore\\s*\\(\\s*\\)", msg: "Define static void ShowScore()." }
+          { type: "fn", fn: (out) => out.includes("+5 points") && out.includes("+10 points") && out.includes("+3 points"), msg: "Print +5 points, +10 points and +3 points", help: "The checker wants <code>+5 points</code>, <code>+10 points</code> and <code>+3 points</code>. Print <code>$\"+{points} points\"</code> inside AddPoints and call it with 5, 10 and 3." },
+          { type: "outputRegex", pattern: "Score: 15[\\s\\S]*Score: 18", msg: "Print Score: 15 and then Score: 18", help: "The checker wants <code>Score: 15</code> and later <code>Score: 18</code>. Make sure <code>score</code> is a single global variable and AddPoints adds to it." },
+          { type: "code", pattern: "static\\s+int\\s+score", msg: "Declare score as a global: static int score = 0; at class level.", help: "The checker looks for <code>static int score</code>. Declare it inside <code>class Program</code> but outside every method." },
+          { type: "code", pattern: "static\\s+void\\s+AddPoints\\s*\\(\\s*int", msg: "Define static void AddPoints(int points).", help: "The checker looks for <code>static void AddPoints(int ...)</code>. Check the spelling and the parameter." },
+          { type: "code", pattern: "static\\s+void\\s+ShowScore\\s*\\(\\s*\\)", msg: "Define static void ShowScore().", help: "The checker looks for <code>static void ShowScore()</code>. Check the spelling and empty brackets." }
         ],
-        hint: "The global goes straight after class Program {, before static void Main. Inside AddPoints: score += points;"
+        hint: "The global goes straight after class Program {, before static void Main. Inside AddPoints: score += points;",
+        goal: "The program keeps a global score, adds points to it through a method, and shows the score twice as it grows.",
+        steps: [
+          "Find <code>// TODO: declare the global variable score here</code> (inside <code>class Program</code>, above <code>Main</code>) and type <code>static int score = 0;</code>.",
+          "Below <code>Main</code>, write <code>static void AddPoints(int points)</code> with curly brackets.",
+          "Inside, add <code>score += points;</code> and print <code>$\"+{points} points\"</code>.",
+          "Write <code>static void ShowScore()</code> with curly brackets that prints <code>$\"Score: {score}\"</code>.",
+          "In <code>Main</code>, call <code>AddPoints(5);</code>, <code>AddPoints(10);</code>, <code>ShowScore();</code>, <code>AddPoints(3);</code>, <code>ShowScore();</code>. Press <strong>Run</strong>: you should see Score: 15 then Score: 18."
+        ],
+        hints: [
+          "A global variable is declared at class level, so every method in the class can see and change it.",
+          "Declare <code>static int score = 0;</code> outside any method. <code>AddPoints</code> changes it; <code>ShowScore</code> prints it.",
+          "<code>static void AddPoints(int points)\n{\n    score += points;\n    Console.WriteLine($\"+{points} points\");\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Declaring <code>int score = 0;</code> inside <code>Main</code>.", fix: "Then the other methods can't see it. Move it to class level and add <code>static</code>." },
+          { wrong: "Declaring <code>int score = 0;</code> inside <code>AddPoints</code>.", fix: "That makes a new local variable each time, so the global never changes. Just use <code>score += points;</code>." },
+          { wrong: "Missing <code>static</code> on the global or the methods.", fix: "Everything used from <code>Main</code> needs <code>static</code> for now." },
+          { wrong: "Printing <code>+points points</code> as plain text.", fix: "Use an interpolated string: <code>$\"+{points} points\"</code>." }
+        ]
       },
 
       // ---------------------------------------------------------------- l6
@@ -517,14 +613,34 @@ static bool TryLogin(string user, string pin, out string message)
 }` }),
         stdin: ["niamh", "2468"],
         tests: [
-          { type: "output", stdin: ["niamh", "2468"], includes: "After swap: 9 and 4", msg: "Swap should change the variables in Main: After swap: 9 and 4" },
-          { type: "fn", stdin: ["niamh", "2468"], fn: (out) => out.includes("Welcome, niamh!") && out.includes("Unlocked: True"), msg: "niamh / 2468 should print Welcome, niamh! and Unlocked: True" },
-          { type: "fn", stdin: ["niamh", "1111"], fn: (out) => out.includes("Login failed.") && out.includes("Unlocked: False"), msg: "A wrong PIN should print Login failed. and Unlocked: False" },
-          { type: "code", pattern: "static\\s+void\\s+Swap\\s*\\(\\s*ref\\s+int\\s+\\w+\\s*,\\s*ref\\s+int", msg: "Define Swap with two ref int parameters." },
-          { type: "code", pattern: "static\\s+bool\\s+TryLogin\\s*\\([^)]*out\\s+string", msg: "TryLogin should return bool and have an out string parameter." },
-          { type: "code", pattern: "TryLogin\\s*\\([^)]*out\\s+", msg: "Call TryLogin with out." }
+          { type: "output", stdin: ["niamh", "2468"], includes: "After swap: 9 and 4", msg: "Swap should change the variables in Main: After swap: 9 and 4", help: "The checker wants <code>After swap: 9 and 4</code>. Use <code>ref</code> in both the method and the call, and swap using a temp variable." },
+          { type: "fn", stdin: ["niamh", "2468"], fn: (out) => out.includes("Welcome, niamh!") && out.includes("Unlocked: True"), msg: "niamh / 2468 should print Welcome, niamh! and Unlocked: True", help: "When the inputs are <code>niamh</code> and <code>2468</code>, it should print <code>Welcome, niamh!</code> and <code>Unlocked: True</code>. Make sure Main uses the value returned by <code>TryLogin</code>." },
+          { type: "fn", stdin: ["niamh", "1111"], fn: (out) => out.includes("Login failed.") && out.includes("Unlocked: False"), msg: "A wrong PIN should print Login failed. and Unlocked: False", help: "When the inputs are <code>niamh</code> and <code>1111</code>, it should print <code>Login failed.</code> and <code>Unlocked: False</code>. Set the message and return false when the details don't match." },
+          { type: "code", pattern: "static\\s+void\\s+Swap\\s*\\(\\s*ref\\s+int\\s+\\w+\\s*,\\s*ref\\s+int", msg: "Define Swap with two ref int parameters.", help: "The checker looks for <code>static void Swap(ref int ..., ref int ...)</code>. Put <code>ref</code> before both parameters." },
+          { type: "code", pattern: "static\\s+bool\\s+TryLogin\\s*\\([^)]*out\\s+string", msg: "TryLogin should return bool and have an out string parameter.", help: "The checker looks for <code>static bool TryLogin(... out string ...)</code>. Check the return type is <code>bool</code> and the last parameter is <code>out string message</code>." },
+          { type: "code", pattern: "TryLogin\\s*\\([^)]*out\\s+", msg: "Call TryLogin with out.", help: "The checker looks for a call to <code>TryLogin</code> that uses <code>out</code>. Write <code>TryLogin(user, pin, out string message)</code> in Main." }
         ],
-        hint: "Swap(ref first, ref second);  and inside Swap: int temp = a; a = b; b = temp;"
+        hint: "Swap(ref first, ref second);  and inside Swap: int temp = a; a = b; b = temp;",
+        goal: "The program swaps two numbers using ref, then checks a username and PIN with a function that hands back a message through out.",
+        steps: [
+          "Under <code>// TODO: static void Swap</code>, write <code>static void Swap(ref int a, ref int b)</code> with curly brackets.",
+          "Inside, swap with a temp: <code>int temp = a;</code>, <code>a = b;</code>, <code>b = temp;</code>.",
+          "In <code>Main</code>, replace the Swap TODO with <code>Swap(ref first, ref second);</code>. Press <strong>Run</strong>: you should see After swap: 9 and 4.",
+          "Under the TryLogin TODO, write <code>static bool TryLogin(string user, string pin, out string message)</code>. Inside, if user is <code>niamh</code> and pin is <code>2468</code>, set <code>message = \"Welcome, niamh!\";</code> and <code>return true;</code>.",
+          "After that <code>if</code>, set <code>message = \"Login failed.\";</code> and <code>return false;</code>.",
+          "In <code>Main</code>, delete the two lines <code>bool ok = false;</code> and <code>string message = \"\";</code> and put <code>bool ok = TryLogin(user, pin, out string message);</code> in their place. Run it."
+        ],
+        hints: [
+          "<code>ref</code> lets a method change the caller's variable. <code>out</code> lets a method hand back an extra result.",
+          "Write <code>ref</code> in both the method header and the call. For <code>out</code>, the method must set <code>message</code> on every path before it returns.",
+          "<code>static bool TryLogin(string user, string pin, out string message)\n{\n    if (user == \"niamh\" &amp;&amp; pin == \"2468\")\n    {\n        message = \"Welcome, niamh!\";\n        return true;\n    }\n    message = \"Login failed.\";\n    return false;\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Writing <code>Swap(first, second);</code> without <code>ref</code>.", fix: "C# gives an error. Write <code>ref</code> in the call too: <code>Swap(ref first, ref second);</code>." },
+          { wrong: "Swapping without a temp: <code>a = b; b = a;</code>.", fix: "Both end up as 9. Save <code>a</code> in <code>temp</code> first." },
+          { wrong: "Only setting <code>message</code> inside the <code>if</code>.", fix: "An <code>out</code> parameter must be set on every path. Set it before <code>return false;</code> too." },
+          { wrong: "Keeping <code>string message = \"\";</code> and also writing <code>out string message</code>.", fix: "That declares <code>message</code> twice. Delete the old two lines first." }
+        ]
       },
 
       // ---------------------------------------------------------------- l7
@@ -595,13 +711,32 @@ static int Total(int a, int b, int c)
     return a + b + c;
 }` }),
         tests: [
-          { type: "output", includes: "Welcome, Grace!", msg: "Welcome(\"Grace\") should print Welcome, Grace!" },
-          { type: "output", includes: "Welcome, Oisín of Eagles house!", msg: "Welcome(\"Oisín\", \"Eagles\") should print Welcome, Oisín of Eagles house!" },
-          { type: "fn", fn: (out) => out.includes("Two scores: 9") && out.includes("Three scores: 15"), msg: "Print Two scores: 9 and Three scores: 15" },
-          { type: "fn", fn: (out, code) => (code.match(/static\s+void\s+Welcome\s*\(/g) || []).length === 2, msg: "Write two methods both called Welcome." },
-          { type: "fn", fn: (out, code) => (code.match(/static\s+int\s+Total\s*\(/g) || []).length === 2, msg: "Write two methods both called Total." }
+          { type: "output", includes: "Welcome, Grace!", msg: "Welcome(\"Grace\") should print Welcome, Grace!", help: "The checker wants <code>Welcome, Grace!</code>. Write <code>Welcome(string name)</code> and call it with <code>\"Grace\"</code>." },
+          { type: "output", includes: "Welcome, Oisín of Eagles house!", msg: "Welcome(\"Oisín\", \"Eagles\") should print Welcome, Oisín of Eagles house!", help: "The checker wants <code>Welcome, Oisín of Eagles house!</code>. Write the two-parameter <code>Welcome</code> and check the wording, including the word house." },
+          { type: "fn", fn: (out) => out.includes("Two scores: 9") && out.includes("Three scores: 15"), msg: "Print Two scores: 9 and Three scores: 15", help: "The checker wants <code>Two scores: 9</code> and <code>Three scores: 15</code>. Make sure each Total returns the sum and you print the result." },
+          { type: "fn", fn: (out, code) => (code.match(/static\s+void\s+Welcome\s*\(/g) || []).length === 2, msg: "Write two methods both called Welcome.", help: "The checker wants exactly two methods called <code>static void Welcome(</code>. Use the same name for both, with different parameters." },
+          { type: "fn", fn: (out, code) => (code.match(/static\s+int\s+Total\s*\(/g) || []).length === 2, msg: "Write two methods both called Total.", help: "The checker wants exactly two methods called <code>static int Total(</code>. Use the same name for both, one with two ints and one with three." }
         ],
-        hint: "Both Welcome methods have exactly the same name; only the brackets differ: (string name) and (string name, string house)."
+        hint: "Both Welcome methods have exactly the same name; only the brackets differ: (string name) and (string name, string house).",
+        goal: "The program welcomes two pupils and adds up two sets of scores, using pairs of methods that share the same name but take different parameters.",
+        steps: [
+          "Under <code>// TODO: two Welcome procedures</code>, write <code>static void Welcome(string name)</code> that prints <code>$\"Welcome, {name}!\"</code>.",
+          "Below it, write a second <code>static void Welcome(string name, string house)</code> that prints <code>$\"Welcome, {name} of {house} house!\"</code>.",
+          "In <code>Main</code>, call <code>Welcome(\"Grace\");</code> and <code>Welcome(\"Oisín\", \"Eagles\");</code>. Press <strong>Run</strong>.",
+          "Under the Total TODO, write <code>static int Total(int a, int b)</code> returning <code>a + b</code>, and <code>static int Total(int a, int b, int c)</code> returning <code>a + b + c</code>.",
+          "In <code>Main</code>, print <code>$\"Two scores: {Total(4, 5)}\"</code> and <code>$\"Three scores: {Total(4, 5, 6)}\"</code>. Run again."
+        ],
+        hints: [
+          "Overloading means writing several methods with exactly the same name, as long as their brackets hold different parameters.",
+          "Write <code>Welcome</code> twice (one parameter, then two) and <code>Total</code> twice (two ints, then three). C# picks the right one from the arguments you pass.",
+          "<code>static int Total(int a, int b)\n{\n    return a + b;\n}\n\nstatic int Total(int a, int b, int c)\n{\n    return a + b + c;\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Giving them different names like <code>Welcome2</code> or <code>Total3</code>.", fix: "Overloads must share exactly the same name. Only the parameters differ." },
+          { wrong: "Giving both methods the same parameters.", fix: "C# can't tell them apart. One must have a different number or type of parameters." },
+          { wrong: "Forgetting <code>house</code> in the message: <code>Welcome, Oisín of Eagles!</code>.", fix: "The exact text is <code>Welcome, {name} of {house} house!</code>." },
+          { wrong: "Calling <code>Total(4, 5);</code> on its own line.", fix: "The answer is thrown away. Use the call inside your print." }
+        ]
       },
 
       // ---------------------------------------------------------------- l8
@@ -705,15 +840,35 @@ static double CalculateCost(double price, int qty)
 }` }),
         stdin: ["2", "3"],
         tests: [
-          { type: "fn", stdin: ["2", "3"], fn: (out) => out.includes("1. Crisps") && out.includes("3. Cookie") && out.includes("Total: £3.60"), msg: "Show the menu; 3 juices should give Total: £3.60" },
-          { type: "output", stdin: ["1", "5"], includes: "Total: £3.60", msg: "5 crisps is £4.00 minus 10%: Total: £3.60" },
-          { type: "output", stdin: ["3", "10"], includes: "Total: £8.55", msg: "10 cookies is £9.50 minus 10%: Total: £8.55" },
-          { type: "code", pattern: "static\\s+void\\s+ShowMenu\\s*\\(\\s*\\)", msg: "Write static void ShowMenu()." },
-          { type: "code", pattern: "static\\s+int\\s+AskNumber\\s*\\(\\s*string", msg: "Write static int AskNumber(string prompt)." },
-          { type: "code", pattern: "static\\s+double\\s+GetPrice\\s*\\(\\s*int[\\s\\S]*static\\s+double\\s+CalculateCost\\s*\\(|static\\s+double\\s+CalculateCost\\s*\\([\\s\\S]*static\\s+double\\s+GetPrice\\s*\\(\\s*int", msg: "Write GetPrice and CalculateCost as double functions." },
-          { type: "fn", fn: (out, code) => { const body = methodBody(code, "Main"); return body !== null && !/ReadLine/.test(body); }, msg: "Main shouldn't call Console.ReadLine directly; use AskNumber." }
+          { type: "fn", stdin: ["2", "3"], fn: (out) => out.includes("1. Crisps") && out.includes("3. Cookie") && out.includes("Total: £3.60"), msg: "Show the menu; 3 juices should give Total: £3.60", help: "When the inputs are <code>2</code> and <code>3</code>, it should show the menu and print <code>Total: £3.60</code>. Check ShowMenu prints the three lines and GetPrice returns 1.20 for item 2." },
+          { type: "output", stdin: ["1", "5"], includes: "Total: £3.60", msg: "5 crisps is £4.00 minus 10%: Total: £3.60", help: "When the inputs are <code>1</code> and <code>5</code>, it should print <code>Total: £3.60</code>. Five crisps get 10% off, so use <code>qty &gt;= 5</code> and <code>cost * 0.9</code>." },
+          { type: "output", stdin: ["3", "10"], includes: "Total: £8.55", msg: "10 cookies is £9.50 minus 10%: Total: £8.55", help: "When the inputs are <code>3</code> and <code>10</code>, it should print <code>Total: £8.55</code>. Check GetPrice returns 0.95 for item 3 and the discount is applied." },
+          { type: "code", pattern: "static\\s+void\\s+ShowMenu\\s*\\(\\s*\\)", msg: "Write static void ShowMenu().", help: "The checker looks for <code>static void ShowMenu()</code>. Check the spelling and empty brackets." },
+          { type: "code", pattern: "static\\s+int\\s+AskNumber\\s*\\(\\s*string", msg: "Write static int AskNumber(string prompt).", help: "The checker looks for <code>static int AskNumber(string ...)</code>. It should take the prompt as a string and return an int." },
+          { type: "code", pattern: "static\\s+double\\s+GetPrice\\s*\\(\\s*int[\\s\\S]*static\\s+double\\s+CalculateCost\\s*\\(|static\\s+double\\s+CalculateCost\\s*\\([\\s\\S]*static\\s+double\\s+GetPrice\\s*\\(\\s*int", msg: "Write GetPrice and CalculateCost as double functions.", help: "The checker looks for <code>static double GetPrice(int ...)</code> and <code>static double CalculateCost(</code>. Both must return a <code>double</code>." },
+          { type: "fn", fn: (out, code) => { const body = methodBody(code, "Main"); return body !== null && !/ReadLine/.test(body); }, msg: "Main shouldn't call Console.ReadLine directly; use AskNumber.", help: "Main must not call <code>Console.ReadLine</code> itself. Get both numbers through <code>AskNumber</code>." }
         ],
-        hint: "AskNumber: Console.Write(prompt); return Convert.ToInt32(Console.ReadLine());  CalculateCost: work out price * qty, apply * 0.9 if qty >= 5, then return it."
+        hint: "AskNumber: Console.Write(prompt); return Convert.ToInt32(Console.ReadLine());  CalculateCost: work out price * qty, apply * 0.9 if qty >= 5, then return it.",
+        goal: "The tuck shop program shows a menu, asks for an item and a quantity, and prints the total cost with a discount for 5 or more, now split into tidy methods.",
+        steps: [
+          "Under <code>// TODO: static void ShowMenu()</code>, write the method so it prints the three menu lines exactly as in the original code.",
+          "Write <code>static int AskNumber(string prompt)</code>. Inside: <code>Console.Write(prompt);</code> then <code>return Convert.ToInt32(Console.ReadLine());</code>.",
+          "Write <code>static double GetPrice(int item)</code> that returns <code>0.80</code> for item 1, <code>1.20</code> for item 2 and <code>0.95</code> otherwise.",
+          "Write <code>static double CalculateCost(double price, int qty)</code>: work out <code>price * qty</code>, multiply by <code>0.9</code> if <code>qty &gt;= 5</code>, then return it.",
+          "In <code>Main</code>, turn each TODO into real code: <code>ShowMenu();</code>, <code>int item = AskNumber(\"Item number: \");</code> and so on.",
+          "Delete the line <code>double cost = 0; // TODO: remove this line...</code>. Press <strong>Run</strong> with 2 and 3: you should see Total: £3.60."
+        ],
+        hints: [
+          "Each method does one job from the original program. Main just calls them in order.",
+          "<code>ShowMenu</code> is a procedure (<code>void</code>). The other three are functions that <code>return</code> a value. All input goes through <code>AskNumber</code>, so <code>ReadLine</code> only appears there.",
+          "<code>static double CalculateCost(double price, int qty)\n{\n    double cost = price * qty;\n    if (qty &gt;= 5)\n    {\n        cost = cost * 0.9;\n    }\n    return cost;\n}</code>"
+        ],
+        mistakes: [
+          { wrong: "Leaving the line <code>double cost = 0;</code> as well as your new <code>double cost = CalculateCost(...)</code>.", fix: "That declares <code>cost</code> twice. Delete the placeholder line." },
+          { wrong: "Calling <code>Console.ReadLine()</code> in Main.", fix: "The checker doesn't allow it. Use <code>AskNumber(\"Quantity: \")</code> instead." },
+          { wrong: "Calling <code>CalculateCost(price, qty);</code> without storing the answer.", fix: "Store it: <code>double cost = CalculateCost(price, qty);</code>." },
+          { wrong: "Using <code>qty &gt; 5</code>, so exactly 5 items get no discount.", fix: "The rule is 5 or more: <code>qty &gt;= 5</code>." }
+        ]
       },
 
       // ---------------------------------------------------------------- quiz

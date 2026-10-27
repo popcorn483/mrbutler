@@ -77,11 +77,34 @@ class Program
     }
 }`,
       tests: [
-        { type: "output", includes: "Welcome to C# Academy!", msg: "Keep the line that prints Welcome to C# Academy!" },
-        { type: "output", includes: "I am ready to code!", msg: "Print I am ready to code! (check the spelling and the exclamation mark)." },
-        { type: "outputRegex", pattern: "Welcome to C# Academy![\\s\\S]*I am ready to code!", msg: "Print I am ready to code! after the welcome message." }
+        { type: "output", includes: "Welcome to C# Academy!", msg: "Keep the line that prints Welcome to C# Academy!",
+          help: "This check looks for <code>Welcome to C# Academy!</code> in the output. Don't delete or change the line that was already there; add your new line underneath it instead." },
+        { type: "output", includes: "I am ready to code!", msg: "Print I am ready to code! (check the spelling and the exclamation mark).",
+          help: "Your program needs to print exactly <code>I am ready to code!</code>, with the exclamation mark at the end. Check the spelling inside the quotes of your new <code>Console.WriteLine</code>." },
+        { type: "outputRegex", pattern: "Welcome to C# Academy![\\s\\S]*I am ready to code!", msg: "Print I am ready to code! after the welcome message.",
+          help: "The welcome message must come first and your new message second. Make sure your new line is <em>underneath</em> the existing <code>Console.WriteLine</code>, not above it." }
       ],
-      hint: "Copy the existing Console.WriteLine line, paste it underneath and change the words inside the quotes."
+      hint: "Copy the existing Console.WriteLine line, paste it underneath and change the words inside the quotes.",
+      goal: "When it runs, your program prints a welcome message and then <code>I am ready to code!</code> on the next line.",
+      steps: [
+        "Press <strong>Run</strong> to see what the starter code prints in the console.",
+        "In the editor, find the line that says <code>// TODO: add a line here that prints I am ready to code!</code>",
+        "Click at the end of that line and press <strong>Enter</strong> to make a new, empty line underneath it.",
+        "On the new line, type <code>Console.WriteLine(\"I am ready to code!\");</code> exactly, including the quotes, brackets and semicolon.",
+        "Press <strong>Run</strong>. You should see two lines in the console.",
+        "If both lines look right, press <strong>Check</strong>."
+      ],
+      hints: [
+        "You already have one line that prints a message. Your new message works in exactly the same way.",
+        "Use <code>Console.WriteLine</code> again, on a new line underneath the first one. The words you want to print go inside double quotes.",
+        "Your new line should look like this: <code>Console.WriteLine(\"I am ready to code!\");</code>"
+      ],
+      mistakes: [
+        { wrong: "Typing the words on their own, like <code>I am ready to code!</code>, with no <code>Console.WriteLine</code>.", fix: "The computer only prints text that is inside <code>Console.WriteLine(\"...\");</code>. Wrap your words in that pattern." },
+        { wrong: "Leaving off the semicolon at the end: <code>Console.WriteLine(\"I am ready to code!\")</code>", fix: "Every statement ends with <code>;</code>. If you see an error saying <code>; expected</code>, add one at the end of the line." },
+        { wrong: "Spelling <code>console</code> with a small c, or <code>Writeline</code> with a small l.", fix: "C# is case sensitive. Copy the capital letters exactly: <code>Console.WriteLine</code>." },
+        { wrong: "Forgetting the exclamation mark, or adding an extra space inside the quotes.", fix: "Compare your text with the instructions letter by letter. The text inside the quotes is printed exactly as you type it." }
+      ]
     },
     {
       id: "m00-l3",
@@ -140,12 +163,36 @@ class Program
     }
 }`,
       tests: [
-        { type: "output", includes: "Hello, World!", msg: "Print Hello, World! (with a comma and an exclamation mark)." },
-        { type: "output", includes: "This is my first C# program.", msg: "Print This is my first C# program." },
-        { type: "outputRegex", pattern: "Hello, World![\\s\\S]*This is my first C# program\\.", msg: "Print Hello, World! first, then the second line." },
-        { type: "code", pattern: "Console\\.WriteLine\\(", msg: "Use Console.WriteLine to print." }
+        { type: "output", includes: "Hello, World!", msg: "Print Hello, World! (with a comma and an exclamation mark).",
+          help: "Your program needs to print exactly <code>Hello, World!</code>: a capital H and W, a comma after Hello and an exclamation mark at the end. Check the text inside your first <code>Console.WriteLine</code>." },
+        { type: "output", includes: "This is my first C# program.", msg: "Print This is my first C# program.",
+          help: "This check looks for <code>This is my first C# program.</code> in the output, including the full stop. Check the spelling inside your second <code>Console.WriteLine</code>." },
+        { type: "outputRegex", pattern: "Hello, World![\\s\\S]*This is my first C# program\\.", msg: "Print Hello, World! first, then the second line.",
+          help: "Both lines are there but in the wrong order. Put the <code>Hello, World!</code> line above the other one, because code runs from top to bottom." },
+        { type: "code", pattern: "Console\\.WriteLine\\(", msg: "Use Console.WriteLine to print.",
+          help: "This check looks for <code>Console.WriteLine(</code> in your code. Make sure you used <code>WriteLine</code> (with capital C, W and L) to print your text." }
       ],
-      hint: "You need two lines, each like Console.WriteLine(\"...\"); Don't forget the semicolons."
+      hint: "You need two lines, each like Console.WriteLine(\"...\"); Don't forget the semicolons.",
+      goal: "When it runs, your program prints <code>Hello, World!</code> and then <code>This is my first C# program.</code> on the line below.",
+      steps: [
+        "Find the line that says <code>// TODO: print Hello, World!</code>",
+        "On the empty line just under it, type <code>Console.WriteLine(\"Hello, World!\");</code>",
+        "Press <strong>Run</strong>. You should see <code>Hello, World!</code> in the console.",
+        "Find the line that says <code>// TODO: print This is my first C# program.</code>",
+        "On the empty line under it, write another <code>Console.WriteLine</code> that prints <code>This is my first C# program.</code>",
+        "Press <strong>Run</strong> to check both lines appear, then press <strong>Check</strong>."
+      ],
+      hints: [
+        "Each line of text you want on the screen needs its own print statement.",
+        "Use <code>Console.WriteLine(\"...\");</code> twice: once under each <code>// TODO</code> comment. Put the exact words inside the double quotes.",
+        "The first line is <code>Console.WriteLine(\"Hello, World!\");</code>. The second line follows the same pattern with different words."
+      ],
+      mistakes: [
+        { wrong: "Missing the comma or exclamation mark: <code>\"Hello World\"</code>", fix: "Punctuation matters. It must be <code>\"Hello, World!\"</code> exactly." },
+        { wrong: "Forgetting the double quotes round the text: <code>Console.WriteLine(Hello, World!);</code>", fix: "Text (a string) always goes inside double quotes <code>\" \"</code>. Without them C# thinks the words are code and gives an error." },
+        { wrong: "Leaving off the semicolon at the end of a line.", fix: "If the error says <code>; expected</code>, look at the end of the line it mentions (or the line above) and add <code>;</code>." },
+        { wrong: "Typing the code on the same line as the <code>//</code> comment.", fix: "Anything after <code>//</code> on a line is ignored. Put your code on its own line, underneath the comment." }
+      ]
     },
     {
       id: "m00-l4",
@@ -208,12 +255,36 @@ namespace Kitchen
     }
 }`,
       tests: [
-        { type: "output", includes: "1. Put bread in the toaster", msg: "Print 1. Put bread in the toaster" },
-        { type: "output", includes: "2. Wait until it pops up", msg: "Print 2. Wait until it pops up" },
-        { type: "output", includes: "3. Spread the butter", msg: "Print 3. Spread the butter" },
-        { type: "outputRegex", pattern: "1\\. Put[\\s\\S]*2\\. Wait[\\s\\S]*3\\. Spread", msg: "The steps must be in the right order: 1, 2, 3." }
+        { type: "output", includes: "1. Put bread in the toaster", msg: "Print 1. Put bread in the toaster",
+          help: "Your program needs to print <code>1. Put bread in the toaster</code>, including the number, the full stop and the space after it. Check the spelling inside your first <code>Console.WriteLine</code>." },
+        { type: "output", includes: "2. Wait until it pops up", msg: "Print 2. Wait until it pops up",
+          help: "This check looks for <code>2. Wait until it pops up</code> in the output. Check you have a second <code>Console.WriteLine</code> and that the words match exactly." },
+        { type: "output", includes: "3. Spread the butter", msg: "Print 3. Spread the butter",
+          help: "This check looks for <code>3. Spread the butter</code> in the output. Check you have a third <code>Console.WriteLine</code> with exactly those words." },
+        { type: "outputRegex", pattern: "1\\. Put[\\s\\S]*2\\. Wait[\\s\\S]*3\\. Spread", msg: "The steps must be in the right order: 1, 2, 3.",
+          help: "All three steps are printed, but not in order. Code runs top to bottom, so put the step 1 line first, then step 2, then step 3." }
       ],
-      hint: "Three Console.WriteLine statements, one per step, each ending with a semicolon. Keep them inside the braces of Main."
+      hint: "Three Console.WriteLine statements, one per step, each ending with a semicolon. Keep them inside the braces of Main.",
+      goal: "When it runs, your program prints the three steps for making toast, numbered 1 to 3, each on its own line.",
+      steps: [
+        "Find the line that says <code>// TODO: print the three steps for making toast, in order</code>",
+        "On the empty line under it, type <code>Console.WriteLine(\"1. Put bread in the toaster\");</code>",
+        "Press <strong>Run</strong> to check the first step appears.",
+        "Press <strong>Enter</strong> to make a new line, then add a second <code>Console.WriteLine</code> for <code>2. Wait until it pops up</code>",
+        "Add a third <code>Console.WriteLine</code> underneath for <code>3. Spread the butter</code>",
+        "Check all your lines are still inside the <code>{ }</code> braces of <code>Main</code>, then press <strong>Run</strong> and <strong>Check</strong>."
+      ],
+      hints: [
+        "This is a <strong>sequence</strong>: three instructions, one after another. Each instruction prints one line.",
+        "You need three <code>Console.WriteLine</code> statements, one under the other, all inside <code>Main</code>. Copy the text for each one exactly from the instructions.",
+        "The first one is <code>Console.WriteLine(\"1. Put bread in the toaster\");</code>. The other two follow the same pattern."
+      ],
+      mistakes: [
+        { wrong: "Leaving out the number and full stop, e.g. printing <code>Put bread in the toaster</code>.", fix: "The number and the full stop are part of the text. Type <code>1. </code> at the start, inside the quotes." },
+        { wrong: "Typing your code below a closing brace <code>}</code>, outside <code>Main</code>.", fix: "Your statements must sit between the <code>{</code> and <code>}</code> of <code>Main</code>. Put them where the <code>// TODO</code> comment is." },
+        { wrong: "Deleting a brace by accident, so you get an error about <code>}</code> expected.", fix: "Count your braces: every <code>{</code> needs a matching <code>}</code>. If in doubt, copy the starter again and re-add your lines." },
+        { wrong: "Missing a semicolon at the end of one of the lines.", fix: "Each of the three lines must end with <code>;</code>. The error message tells you which line to look at." }
+      ]
     },
     {
       id: "m00-l5",
@@ -265,11 +336,33 @@ class Program
     }
 }`,
       tests: [
-        { type: "output", includes: "Rugby training is at 3:30.", msg: "Print Rugby training is at 3:30." },
-        { type: "output", includes: "Bring your gum shield!", msg: "Print Bring your gum shield!" },
-        { type: "code", pattern: "3:30\\.\"\\s*\\)\\s*;", msg: "Add the missing semicolon at the end of the first WriteLine." }
+        { type: "output", includes: "Rugby training is at 3:30.", msg: "Print Rugby training is at 3:30.",
+          help: "Your program needs to print <code>Rugby training is at 3:30.</code>. If nothing prints at all, there is still a syntax error: press <strong>Run</strong> and read the first error message." },
+        { type: "output", includes: "Bring your gum shield!", msg: "Print Bring your gum shield!",
+          help: "This check looks for <code>Bring your gum shield!</code> in the output. If it's missing, check that the second line starts with a capital C: <code>Console</code>." },
+        { type: "code", pattern: "3:30\\.\"\\s*\\)\\s*;", msg: "Add the missing semicolon at the end of the first WriteLine.",
+          help: "This check looks for a semicolon straight after <code>(\"Rugby training is at 3:30.\")</code>. Add <code>;</code> at the very end of that line." }
       ],
-      hint: "Line 7 is missing something at the very end. On line 8, C# is case sensitive: is it console or Console?"
+      hint: "Line 7 is missing something at the very end. On line 8, C# is case sensitive: is it console or Console?",
+      goal: "When it runs, your fixed program prints <code>Rugby training is at 3:30.</code> and then <code>Bring your gum shield!</code>",
+      steps: [
+        "Press <strong>Run</strong> before you change anything. Read the first error message and note the line number.",
+        "Go to line 7 (the <code>Rugby training</code> line). Look at the very end of it: what is missing?",
+        "Add a semicolon <code>;</code> after the closing bracket on line 7.",
+        "Press <strong>Run</strong> again and read the next error message.",
+        "On line 8, change <code>console</code> to <code>Console</code> with a capital C.",
+        "Press <strong>Run</strong>. When both lines print, press <strong>Check</strong>."
+      ],
+      hints: [
+        "There are two small mistakes, one on each <code>Console.WriteLine</code> line. Compare each line with a correct example from the Learn pane.",
+        "One line is missing the character that ends every statement. The other line has a word with the wrong capital letter.",
+        "Line 7 should end <code>3:30.\");</code> and line 8 should start <code>Console.WriteLine</code> with a capital C."
+      ],
+      mistakes: [
+        { wrong: "Putting the semicolon inside the quotes: <code>\"Rugby training is at 3:30.;\")</code>", fix: "The <code>;</code> goes right at the end, after the closing bracket <code>)</code>, not inside the text." },
+        { wrong: "Fixing the first error and thinking you're done.", fix: "There are two errors. After each fix, press <strong>Run</strong> again and read the new message." },
+        { wrong: "Changing the words in the message while fixing it.", fix: "Only fix the errors. The text must still say exactly <code>Rugby training is at 3:30.</code> and <code>Bring your gum shield!</code>" }
+      ]
     },
     {
       id: "m00-l6",
@@ -321,10 +414,30 @@ class Program
     }
 }`,
       tests: [
-        { type: "outputRegex", pattern: "Step 1: Wash your hands[\\s\\S]*Step 2: Open the fish food[\\s\\S]*Step 3: Sprinkle a pinch of food in the tank[\\s\\S]*Step 4: Close the lid of the food tub", msg: "Print the four steps in order 1, 2, 3, 4." },
-        { type: "fn", fn: (out) => (out.match(/Step \d/g) || []).length === 4, msg: "Print each step exactly once." }
+        { type: "outputRegex", pattern: "Step 1: Wash your hands[\\s\\S]*Step 2: Open the fish food[\\s\\S]*Step 3: Sprinkle a pinch of food in the tank[\\s\\S]*Step 4: Close the lid of the food tub", msg: "Print the four steps in order 1, 2, 3, 4.",
+          help: "The four steps need to appear in the order 1, 2, 3, 4. Run your program and read the output from top to bottom: whichever step is out of place, move its line." },
+        { type: "fn", fn: (out) => (out.match(/Step \d/g) || []).length === 4, msg: "Print each step exactly once.",
+          help: "This check counts the steps and expects exactly four. You may have copied a line instead of moving it, or deleted one. Make sure each step appears once." }
       ],
-      hint: "Find the line with Step 1 and move it to the top, then Step 2 underneath, and so on."
+      hint: "Find the line with Step 1 and move it to the top, then Step 2 underneath, and so on.",
+      goal: "When it runs, your program prints the four goldfish-feeding steps in the correct order, Step 1 to Step 4.",
+      steps: [
+        "Press <strong>Run</strong> and read the output. Notice the steps are jumbled.",
+        "Find the line that prints <code>Step 1: Wash your hands</code>. Select the whole line and cut it (Ctrl+X).",
+        "Click at the start of the first <code>Console.WriteLine</code> line and paste (Ctrl+V) so Step 1 is now at the top.",
+        "Do the same for Step 2 so it sits directly under Step 1. Then make sure Step 3 is next and Step 4 is last.",
+        "Press <strong>Run</strong> and check the output reads Step 1, 2, 3, 4 in order. Then press <strong>Check</strong>."
+      ],
+      hints: [
+        "Nothing is spelt wrong. The problem is only the <strong>order</strong> of the lines.",
+        "Code runs from top to bottom, so the line that prints Step 1 must be the first <code>Console.WriteLine</code>, and Step 4 the last.",
+        "Your four lines should go in this order: <code>Step 1: Wash your hands</code>, <code>Step 2: Open the fish food</code>, <code>Step 3: Sprinkle...</code>, <code>Step 4: Close the lid...</code>"
+      ],
+      mistakes: [
+        { wrong: "Copying a line (Ctrl+C) instead of cutting it (Ctrl+X), so a step prints twice.", fix: "Run it and count the steps. Delete any duplicate line so each step appears once." },
+        { wrong: "Only changing the numbers in the text (e.g. editing \"Step 3\" to say \"Step 1\").", fix: "Don't change the words. Move the whole line so the matching action is in the right place." },
+        { wrong: "Losing the semicolon or a quote when moving a line.", fix: "Check each moved line still ends with <code>\");</code>. If you get an error, look at the line number it gives." }
+      ]
     },
     {
       id: "m00-quiz",

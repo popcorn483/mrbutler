@@ -146,6 +146,18 @@
     setTimeout(() => t.remove(), 2600);
   }
 
+  // ---------- plain-English error explanations ----------
+  function explainCard(x, dark) {
+    return `<div class="why${dark ? " why-dark" : ""}">
+      <div class="why-head">${icon("bulb", 18)}<strong>${esc(x.title)}</strong>${x.line ? `<span class="why-line">Line ${x.line}</span>` : ""}</div>
+      ${x.code && x.code.trim() ? `<pre class="why-code"><span class="ln">${x.line}</span>${esc(x.code.trim())}</pre>` : ""}
+      <p>${x.what}</p>
+      ${x.fixes && x.fixes.length ? `<p class="why-sub">How to fix it</p><ol class="why-fixes">${x.fixes.map((f) => `<li>${f}</li>`).join("")}</ol>` : ""}
+      ${x.example ? `<div class="why-ex"><div><span>Instead of</span><code>${esc(x.example.before)}</code></div><div><span>Write</span><code>${esc(x.example.after)}</code></div></div>` : ""}
+      ${x.raw ? `<details class="why-raw"><summary>The exact message from C#</summary><code>${esc(x.raw)}</code></details>` : ""}
+    </div>`;
+  }
+
   // ---------- console ----------
   const COLOURS = { Red: "red", DarkRed: "red", Green: "green", DarkGreen: "green", Yellow: "yellow", DarkYellow: "yellow", Blue: "blue", DarkBlue: "blue", Cyan: "cyan", DarkCyan: "cyan", Magenta: "magenta", DarkMagenta: "magenta", Gray: "gray", DarkGray: "darkgray", White: "white" };
   class ConsoleView {
@@ -246,6 +258,13 @@
       });
     }
     cancelInput() { if (this.pending) this.pending(); }
+    card(html) {
+      if (this.el.textContent && !this.el.textContent.endsWith("\n")) this.span("").textContent = "\n";
+      const d = document.createElement("div");
+      d.innerHTML = html;
+      this.el.appendChild(d);
+      this.scroll();
+    }
   }
   function mapKey(e) {
     const k = e.key;
@@ -371,6 +390,9 @@
       if (head) cons.sys(head, "err");
       cons.sys(r.message, "err");
       editor.markLine(r.line);
+      const x = Explain.error(r, editor.get(), {});
+      if (opts.onError) { opts.onError(x); cons.sys("What this means and how to fix it is explained on the left.", "sys"); }
+      else cons.card(explainCard(x, true));
       setStatus(r.kind === "compile" ? "Error" : r.kind === "timeout" ? "Stopped" : "Crashed", "bad");
     }
 
@@ -620,22 +642,40 @@ Console.WriteLine($"It's {year}. Time to learn C#.");</textarea>
     const saved = store.data.code[lesson.id];
     const filesKey = lesson.id;
     if (!store.data.files[filesKey]) store.data.files[filesKey] = Object.assign({}, lesson.files || {});
+    const steps = lesson.steps || [];
+    const hints = lesson.hints && lesson.hints.length ? lesson.hints : lesson.hint ? [lesson.hint] : [];
+    const mistakes = lesson.mistakes || [];
+    store.data.steps = store.data.steps || {};
     main.innerHTML = `
       <div class="lesson">
         <section class="learn" aria-label="Lesson">
           <div class="learn-head">${crumbs(entry)}<h1>${esc(lesson.title)}</h1></div>
           <div class="learn-scroll">
             <div class="prose">${lesson.learn || ""}</div>
-            <div class="panel">
+            <div class="panel" id="taskPanel">
               <h2>${icon("check", 16)}Your task</h2>
               <div class="panel-body">
+                ${lesson.goal ? `<p class="goal"><strong>When it's finished:</strong> ${lesson.goal}</p>` : ""}
                 <ol class="instructions">${(lesson.instructions || []).map((s) => `<li>${s}</li>`).join("")}</ol>
-                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px">
-                  ${lesson.hint ? `<button class="btn btn-quiet" id="hintBtn" type="button">${icon("bulb", 16)}Show a hint</button>` : ""}
+              </div>
+            </div>
+            <div class="panel help-panel">
+              <h2>${icon("bulb", 16)}Help</h2>
+              <div class="panel-body">
+                ${steps.length ? `<details class="help-item" id="stepsBox"><summary>Step-by-step guide <span class="count" id="stepCount"></span></summary>
+                  <p class="help-note">Do one step, press <strong>Run</strong> to see if it works, then tick it off.</p>
+                  <ol class="steps">${steps.map((st, i) => `<li><label><input type="checkbox" data-step="${i}"><span>${st}</span></label></li>`).join("")}</ol></details>` : ""}
+                ${hints.length ? `<div class="hint-ladder"><div id="hintsShown"></div><button class="btn btn-quiet" id="hintBtn" type="button">${icon("bulb", 16)}<span>Show hint 1 of ${hints.length}</span></button></div>` : ""}
+                ${mistakes.length ? `<details class="help-item"><summary>Common mistakes in this exercise</summary><ul class="mistakes">${mistakes.map((m) => `<li><span class="mk-wrong">${m.wrong}</span><span class="mk-fix">${m.fix}</span></li>`).join("")}</ul></details>` : ""}
+                <div class="help-links">
+                  <a href="#/help" class="help-link">Stuck on an error? Read the debugging guide</a>
                   <button class="btn btn-quiet" id="solBtn" type="button" hidden>${icon("eye", 16)}See a solution</button>
                 </div>
-                <div id="hint" class="hint-box" hidden>${lesson.hint || ""}</div>
               </div>
+            </div>
+            <div class="panel why-panel" id="whyPanel" hidden>
+              <h2>${icon("shield", 16)}What went wrong</h2>
+              <div class="panel-body" id="why"></div>
             </div>
             <div class="panel" id="resultsPanel" hidden>
               <h2>Check results</h2>
@@ -658,14 +698,47 @@ Console.WriteLine($"It's {year}. Time to learn C#.");</textarea>
       code: saved != null ? saved : lesson.starter || "",
       starter: lesson.starter || "",
       check: true,
-      welcome: "Press Run to try your program, or Check to have it marked.",
+      welcome: "Press Run to try your program, or Check to have it marked. Stuck? Open the Help panel on the left.",
+      onError: (x) => showWhy(x),
       onChange: (v) => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { store.data.code[lesson.id] = v; store.save(); }, 300); },
       getFiles: () => store.data.files[filesKey],
       saveFiles: () => store.save(),
     });
 
+    // Step-by-step guide: ticks are remembered per lesson
+    const ticked = new Set(store.data.steps[lesson.id] || []);
+    const stepCount = () => { const el = $("#stepCount"); if (el) el.textContent = `${ticked.size} of ${steps.length} done`; };
+    main.querySelectorAll("[data-step]").forEach((cb) => {
+      cb.checked = ticked.has(Number(cb.dataset.step));
+      cb.addEventListener("change", () => {
+        cb.checked ? ticked.add(Number(cb.dataset.step)) : ticked.delete(Number(cb.dataset.step));
+        store.data.steps[lesson.id] = [...ticked];
+        store.save();
+        stepCount();
+      });
+    });
+    stepCount();
+
+    // Hints: shown one at a time, each a bit more specific
+    let hintsShown = 0;
     const hintBtn = $("#hintBtn");
-    if (hintBtn) hintBtn.addEventListener("click", () => { $("#hint").hidden = !$("#hint").hidden; hintBtn.lastChild.textContent = $("#hint").hidden ? "Show a hint" : "Hide the hint"; });
+    const labels = ["A nudge", "More specific", "Nearly the code"];
+    if (hintBtn) hintBtn.addEventListener("click", () => {
+      const box = document.createElement("div");
+      box.className = "hint-box";
+      box.innerHTML = `<span class="hint-label">Hint ${hintsShown + 1}${hints.length === 3 ? ": " + labels[hintsShown] : ""}</span>${hints[hintsShown]}`;
+      $("#hintsShown").appendChild(box);
+      hintsShown++;
+      if (hintsShown >= hints.length) hintBtn.hidden = true;
+      else hintBtn.lastChild.textContent = `Show hint ${hintsShown + 1} of ${hints.length}`;
+    });
+
+    function showWhy(x) {
+      $("#why").innerHTML = explainCard(x, false);
+      decorateProse($("#why"));
+      $("#whyPanel").hidden = false;
+      $("#whyPanel").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
     const solBtn = $("#solBtn");
     const showSolBtn = () => { if (lesson.solution && ((store.data.fails[lesson.id] || 0) >= 2 || isDone(lesson.id))) solBtn.hidden = false; };
     showSolBtn();
@@ -695,17 +768,46 @@ Console.WriteLine($"It's {year}. Time to learn C#.");</textarea>
       const resultsEl = $("#results");
       $("#resultsPanel").hidden = false;
       let html = "";
+      $("#whyPanel").hidden = true;
       if (res.error) {
         const e = res.error;
-        const what = e.kind === "compile" || (!e.kind && e.line) ? "Your code has an error, so it couldn't be checked:" : e.kind === "timeout" ? "Your program didn't finish:" : "Your program crashed while it was being checked:";
-        html += `<p style="margin:0 0 8px">${what}</p><div class="result-error">${esc((e.line ? `Line ${e.line}: ` : "") + e.message.replace(/^Line \d+:\s*/, ""))}</div>`;
+        const what = e.kind === "compile" || (!e.kind && e.line) ? "Your code has an error, so it couldn't be checked." : e.kind === "timeout" ? "Your program didn't finish while it was being checked." : "Your program crashed while it was being checked.";
+        html += `<p class="res-lead">${what}</p>`;
+        if (e.stdin && e.stdin.length) html += `<p class="res-input">The check typed: ${e.stdin.map((v) => `<code>${esc(String(v)) || "(blank)"}</code>`).join(" ")}</p>`;
+        html += explainCard(Explain.error(e, code, { checking: true, ranOut: e.ranOut }), false);
         wb.editor.markLine(e.line);
         wb.cons.sys((e.line ? `Line ${e.line}: ` : "") + e.message.replace(/^Line \d+:\s*/, ""), "err");
       }
       if (res.results.length) {
-        html += `<ul class="results">${res.results.map((r) => `<li><span class="tick ${r.ok ? "on" : "off"}">${r.ok ? tickSvg : crossSvg}</span><span>${r.msg}</span></li>`).join("")}</ul>`;
+        const passedN = res.results.filter((r) => r.ok).length;
+        if (!res.error) html += `<p class="res-lead">${passedN} of ${res.results.length} checks passed.${passedN < res.results.length ? " Fix the first one with a cross, then press Check again." : ""}</p>`;
+        let openedOne = false;
+        html += `<ul class="results">${res.results.map((r) => {
+          let extra = "";
+          if (!r.ok && !res.error) {
+            const near = r.expected ? Explain.nearMiss(r.expected, r.output) : null;
+            if (r.help) extra += `<div class="res-help">${r.help}</div>`;
+            if (near) extra += `<div class="res-near">${near}</div>`;
+            if (r.output !== undefined) {
+              const out = r.output.length > 1500 ? r.output.slice(0, 1500) + "\n…" : r.output;
+              extra += `<details class="compare"${openedOne ? "" : " open"}><summary>Compare what was expected with what your program did</summary>
+                ${r.stdin && r.stdin.length ? `<div class="cmp-row"><span>The check typed</span><div>${r.stdin.map((v) => `<code>${esc(String(v)) || "(blank)"}</code>`).join(" ")}</div></div>` : ""}
+                ${r.expected !== undefined ? `<div class="cmp-row"><span>Expected to see</span><pre>${esc(r.expected)}</pre></div>` : ""}
+                <div class="cmp-row"><span>Your program printed</span><pre>${out.trim() ? esc(out) : "<em>(nothing)</em>"}</pre></div>
+                ${r.ranOut ? `<div class="res-near">Your program asked for more input than this check types. Make sure you only ask the questions in the instructions.</div>` : ""}
+              </details>`;
+              openedOne = true;
+            }
+          }
+          return `<li><span class="tick ${r.ok ? "on" : "off"}">${r.ok ? tickSvg : crossSvg}</span><div class="res-body"><span>${r.msg}</span>${extra}</div></li>`;
+        }).join("")}</ul>`;
       }
+      const tries = (store.data.fails[lesson.id] || 0) + (res.passed ? 0 : 1);
+      if (!res.passed && tries >= 2) html += `<div class="stuck"><strong>Stuck?</strong> Work through the <a href="#" id="openSteps">step-by-step guide</a>, then use the hints one at a time.${lesson.solution ? " You can also see a solution now, but try to understand it rather than copy it." : ""}</div>`;
       resultsEl.innerHTML = html;
+      decorateProse(resultsEl);
+      const os = $("#openSteps");
+      if (os) os.addEventListener("click", (ev) => { ev.preventDefault(); const sb = $("#stepsBox"); if (sb) { sb.open = true; sb.scrollIntoView({ behavior: "smooth", block: "start" }); } });
       if (res.passed) {
         wb.setStatus("Passed", "ok");
         const first = !isDone(lesson.id);
@@ -783,6 +885,75 @@ class Program
     $("#gq").addEventListener("input", (e) => render(e.target.value));
   }
 
+  function viewHelp() {
+    setNav("help");
+    document.title = "Debugging guide · C# Academy";
+    const row = (msg, mean, fix) => `<tr><td><code>${esc(msg)}</code></td><td>${mean}</td><td>${fix}</td></tr>`;
+    main.innerHTML = `
+      <article class="page">
+        <h1>Fixing your code</h1>
+        <div class="prose">
+          <p>Every programmer's code goes wrong, all the time. The skill isn't writing perfect code first time; it's working out <em>why</em> it went wrong. This guide shows you how.</p>
+
+          <h3>The three kinds of error</h3>
+          <table>
+            <tr><th>Kind</th><th>What you'll see</th><th>What it means</th></tr>
+            <tr><td><strong>Syntax error</strong></td><td>"Your code has an error, so it couldn't run", with a line number. The line goes red.</td><td>You broke a rule of the C# language, like a missing <code>;</code> or bracket. Nothing runs until it's fixed.</td></tr>
+            <tr><td><strong>Run-time error</strong></td><td>"Your program crashed", part way through.</td><td>The code is valid, but something impossible happened while it ran, like turning <code>"abc"</code> into a number or dividing by 0.</td></tr>
+            <tr><td><strong>Logic error</strong></td><td>No error at all, but the wrong answer, or Check says a test failed.</td><td>The program does exactly what you told it to, but you told it the wrong thing, like <code>&gt;</code> instead of <code>&gt;=</code>.</td></tr>
+          </table>
+
+          <h3>Reading an error message</h3>
+          <ol>
+            <li><strong>Look at the line number.</strong> The editor highlights that line in red.</li>
+            <li><strong>Read the explanation.</strong> In a lesson it appears in the "What went wrong" box on the left, with what it means and how to fix it.</li>
+            <li><strong>Check the line above too.</strong> A missing <code>;</code> or <code>)</code> is often noticed one line late.</li>
+            <li><strong>Fix the first error first.</strong> One mistake can confuse C# about everything after it.</li>
+          </ol>
+
+          <h3>Good debugging habits</h3>
+          <ul>
+            <li><strong>Run often.</strong> Write a line or two, press Run, check it works, then carry on. A small change is easy to fix.</li>
+            <li><strong>Print values to see inside your program.</strong> Add a temporary line such as <code>Console.WriteLine($"DEBUG: total is {total}");</code> to check a variable has the value you think. Remove it when you've found the problem.</li>
+            <li><strong>Trace it by hand.</strong> Make a trace table: a column for each variable, a row for each time round the loop. Fill it in line by line.</li>
+            <li><strong>Test with different data.</strong> Try normal values, boundary values (right on the edge, like 50 for a pass mark of 50) and wrong input (like <code>abc</code>).</li>
+            <li><strong>Explain it out loud.</strong> Say what each line does to a friend (or a rubber duck). You'll often hear the mistake.</li>
+            <li><strong>Compare with the lesson's example.</strong> Check brackets, capitals and spelling character by character.</li>
+          </ul>
+
+          <h3>When Check fails but Run works</h3>
+          <ul>
+            <li>Check types its own answers into your program. Open the "Compare" box under a failed check to see what it typed, what it expected and what your program printed.</li>
+            <li>Wording must match. <code>Blast off!</code> and <code>Blastoff</code> are different to a computer. Capitals usually don't matter, but spelling, spaces and punctuation do.</li>
+            <li>Only ask the questions the instructions ask for. An extra <code>Console.ReadLine()</code> means the check runs out of answers.</li>
+          </ul>
+
+          <h3>Common error messages</h3>
+          <div style="overflow-x:auto">
+          <table>
+            <tr><th>The message says</th><th>It means</th><th>Try this</th></tr>
+            ${row("; expected", "A statement is missing its semicolon.", "Add <code>;</code> at the end of that line (or the line above).")}
+            ${row(") expected / } expected", "A bracket was opened but never closed.", "Count opening and closing brackets. They must match.")}
+            ${row("Newline in constant", "Text was started with <code>\"</code> but never closed.", "Add the closing <code>\"</code>.")}
+            ${row("The name 'x' does not exist in the current context", "C# doesn't recognise that name.", "Check spelling and capitals, and that the variable was declared first (and in a block that can see it).")}
+            ${row("Cannot implicitly convert type 'string' to 'int'", "You put text into a number variable.", "Convert it: <code>int.Parse(Console.ReadLine())</code>.")}
+            ${row("Cannot implicitly convert type 'double' to 'int'", "A decimal number won't fit in an int.", "Use a <code>double</code> variable, or cast with <code>(int)</code>.")}
+            ${row("Use of unassigned local variable", "The variable has no starting value.", "Give it one: <code>int total = 0;</code>")}
+            ${row("is already defined in this scope", "You declared the same variable twice.", "Leave the type off the second time: <code>total = 5;</code>")}
+            ${row("An object reference is required", "Main is calling a method that isn't static.", "Add <code>static</code> to the method.")}
+            ${row("not all code paths return a value", "A function can finish without a return.", "Add a <code>return</code> at the end.")}
+            ${row("is inaccessible due to its protection level", "That member is private to its class.", "Use a public property or method instead.")}
+            ${row("FormatException", "Text couldn't be turned into a number.", "Type a number, or validate with <code>int.TryParse</code>.")}
+            ${row("IndexOutOfRangeException", "That position isn't in the array.", "Indexes go from 0 to Length − 1. Use <code>&lt;</code> in loops, not <code>&lt;=</code>.")}
+            ${row("DivideByZeroException", "Something was divided by 0.", "Check the value isn't 0 before dividing.")}
+            ${row("NullReferenceException", "A variable holds nothing (null).", "Create the object with <code>new</code>, or check input was given.")}
+            ${row("Your program ran for too long", "A loop never ended.", "Make sure the loop's variable changes so the condition eventually becomes false.")}
+          </table>
+          </div>
+        </div>
+      </article>`;
+  }
+
   // ---------- router ----------
   function route() {
     const h = location.hash.replace(/^#/, "") || "/";
@@ -790,6 +961,7 @@ class Program
     if (parts[0] === "l" && parts[1]) viewLesson(decodeURIComponent(parts[1]));
     else if (parts[0] === "playground") viewPlayground();
     else if (parts[0] === "glossary") viewGlossary();
+    else if (parts[0] === "help") viewHelp();
     else viewHome();
     window.scrollTo(0, 0);
     main.focus({ preventScroll: true });
